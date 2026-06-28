@@ -81,6 +81,16 @@ namespace BattleShipCollection
             return false;
         }
 
+        public void DisplayShipCoords()
+        {
+            foreach(Coordinate coord in occupiedCoordinates)
+            {
+                int x = coord.X;
+                int y = coord.Y;
+                Console.WriteLine($"{x}, {y}");
+            }
+        }
+
     }
 
 }//namespace

@@ -8,6 +8,7 @@ namespace BattleShipCollection
     {
         private int xSize;
         private int ySize;
+        private string shotResult;
         private List<BattleShip> createdShips = new List<BattleShip>();
         private Dictionary<string, BattleShip> activeShips = new Dictionary<string, BattleShip>();
         private List<Coordinate> missedShots = new List<Coordinate>();
@@ -21,6 +22,12 @@ namespace BattleShipCollection
         public int YSize
         {
             get { return this.ySize; }
+        }
+
+        public string ShotResult
+        {
+            get { return this.shotResult; }
+            set { this.shotResult = value; }
         }
 
         public Dictionary<string, BattleShip> ActiveShips
@@ -69,6 +76,8 @@ namespace BattleShipCollection
                 Coordinate startPoint = DetermineStartPoint();
                 PlotRestOfTheShip(ShipWhoNeedsCoords, startPoint);
                 AddShipToActiveregister(ShipWhoNeedsCoords);
+                Console.WriteLine($"{ShipWhoNeedsCoords.Name}");
+                ShipWhoNeedsCoords.DisplayShipCoords();
             }
 
         }//PlotShips()
@@ -96,6 +105,7 @@ namespace BattleShipCollection
                     }
                     foreach (KeyValuePair<string, BattleShip> activeShip in ActiveShips)
                     {
+                        coordCount = 0;
                         foreach (Coordinate activeCoordinates in activeShip.Value.OccupiedCoordinates)
                         {
                             //Checks if a coordinate is occupied
@@ -105,6 +115,8 @@ namespace BattleShipCollection
                                 //Update Coordinate Generator
                                 coordinateGenerator.availableX.Remove(newStartPoint.X);
                                 coordinateGenerator.availableY.Remove(newStartPoint.Y);
+                                coordinateGenerator.XLast = coordinateGenerator.XLast - 1;
+                                coordinateGenerator.YLast = coordinateGenerator.YLast - 1;
 
                                 //Exit both loops
                                 coordinateFound = true;
@@ -253,7 +265,7 @@ namespace BattleShipCollection
 
         }
 
-        private bool DoesCoordinatePairExist(Coordinate givenCoordinates)
+        public bool DoesCoordinatePairExist(Coordinate givenCoordinates)
         {
             bool coordinateFound = false;
             int coordCount = 0, shipsWithNoCurrentCoordinate = 0;
@@ -379,6 +391,81 @@ namespace BattleShipCollection
         {
             return new Coordinate(x, y);
         }
+
+        public void FireShot(int x, int y)
+        {
+            //Initialize
+            Coordinate shotCoord = new Coordinate(x, y);
+
+            //Checks if a ship has that coordinates
+            BattleShip shipThatWasHit = DoesShipHaveCoordinate(shotCoord);
+            if (shipThatWasHit != null)
+            {
+                //It was a hit
+                ShotResult = "Shot was a Hit!";
+                shipThatWasHit.Health = shipThatWasHit.Health - 20;
+                shipThatWasHit.OccupiedCoordinates.Remove(shotCoord);
+                if (shipThatWasHit.Health == 0)
+                {
+                    activeShips.Remove(shipThatWasHit.GenerateShipKey(), out shipThatWasHit);
+                    ShotResult = SunkMessage(shipThatWasHit);
+                }
+                HitShots.Add(shotCoord);
+                
+            }
+            else if (shipThatWasHit == null)
+            {
+                //Not Hit
+                MissedShots.Add(shotCoord);
+                ShotResult = "Shot was a Miss.";
+            }
+        }
+
+        private string SunkMessage(BattleShip sunkenShip)
+        {
+            return $"You have sunk the enemy's {sunkenShip.Name}, well done!";
+        }
+
+        private BattleShip DoesShipHaveCoordinate(Coordinate givenCoordinates)
+        {
+            bool coordinateFound = false;
+            BattleShip foundShip = default;
+            int coordCount = 0, shipsWithNoCurrentCoordinate = 0;
+
+            //Check if falls within map boundries
+            if ((givenCoordinates.X < 0) || (givenCoordinates.X > xSize) || (givenCoordinates.Y < 0) || (givenCoordinates.Y > ySize))
+            {
+                return null;
+            }
+
+            //Check if pair exists in active registry
+            foreach (KeyValuePair<string, BattleShip> activeShip in ActiveShips)
+            {
+                foreach (Coordinate activeCoordinates in activeShip.Value.OccupiedCoordinates)
+                {
+                    //Checks if a coordinate is occupied
+                    if ((activeCoordinates.X == givenCoordinates.X) && (activeCoordinates.Y == givenCoordinates.Y))
+                    {
+
+                        //Exit both loops
+                        coordinateFound = true;
+                        foundShip = activeShip.Value;
+                        break;
+                    }
+
+                }//foreach occupied coordinate
+
+                //Exit the outerloop
+                if (coordinateFound) { break; }
+            }
+
+            return foundShip;
+        }
+
+        private bool CheckWinConditipon()
+        {
+            return true;
+        }
     }
 
     public enum Directions
@@ -394,6 +481,7 @@ namespace BattleShipCollection
         HIT,
         MISS,
         WATER,
+        SHIP
     }
 }
 
