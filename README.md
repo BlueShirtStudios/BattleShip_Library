@@ -36,14 +36,3 @@ Whether you want to build a mini-game inside a larger project, create an educati
 
 *Detailed implementation guides, code snippets, and API documentation will be provided here as the library approaches its stable v1.0 release.*
 
-### Quick Start Preview (Concept)
-```csharp
-// Initialize the engine with a 10x10 grid
-var engine = new BattleEngine(rows: 10, cols: 10);
-
-// Add custom ships
-engine.RegisterShip("Submarine", length: 3);
-engine.RegisterShip("Carrier", length: 5);
-
-// Start the match
-engine.StartGame();
