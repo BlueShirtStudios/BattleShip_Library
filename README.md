@@ -1,17 +1,49 @@
-# BattleMath_Library
+# BattleShip_Library
 
-#What is this
-A C# Library simplifing implementation of a lightweight battleship game, allowing it to be integrated in various projects. This could be a mini game in a larger project or could be used allongside education material to create a educational game. Or use it to create your own spin on the battle ship game.
+A lightweight, highly customizable C# library designed to simplify the implementation of Battleship game logic. 
 
-#Archtechural View
-* **Battle Engine:**  Serves as the entry point for the library. The engine brings all the seperate components together to simplify the implementation of the battle ship logic.
-* **Unlimited Customization:** You specify the game setup, from the size of the map to the types of ships you want to have on the grid.
-* **Custom Game Rules:** The rules are meant to be changed to create new unique experience for each battleship game. As of now this feuture does not exist but will come. This allows you to customize the game, you can set rules to implement max amount of shots then the game ends and so on.
+Whether you want to build a mini-game inside a larger project, create an educational tool for students, or develop an entirely new spin on the classic Battleship formula, this library handles the heavy lifting for you.
 
-#Supported Features
-* **1 Player:** Play against the computer.
-* **One way support:** As of now, you can only fire at the enemy and win, the computer cannot attck back.
-* **Save Stats:** You can check you stats and how you perform accross mulitple games with our stat tracker.
+---
 
-#How to use
-This will be updated as soon as there is more to the library to implement.
+## 🏗️ Architectural View
+
+*   **The Battle Engine:** Serves as the central entry point of the library. It orchestrates the separate internal components, exposing a clean, simplified method for managing game loops and grid logic.
+*   **Unlimited Customization:** Total control over the battlefield. Developers can dynamically define the grid dimensions and specify custom ship types, lengths, and quantities.
+*   **Dynamic Rule Engine (Coming Soon):** Built with extensibility in mind. Future updates will allow you to inject custom win/loss conditions, modify firing mechanics, or enforce turn/shot limits to create unique gameplay modes.
+
+---
+
+## 🚀 Current Features
+
+*   **Single-Player Ready:** Easily initialize a game grid and deploy a fleet for a player to interact with.
+*   **Targeting System:** Built-in coordinate validation and hit/miss/sink state tracking.
+*   **Stat Tracker:** Persistent or session-based tracking to monitor player performance, accuracy, and win rates across multiple matches.
+
+---
+
+## 🗺️ Roadmap & Upcoming Features
+
+> ⚠️ **Note on Current State:** The library currently supports player-to-grid interaction (firing at an enemy fleet). Full turn-based AI counter-attacks are actively being developed.
+
+*   [ ] **AI Counter-Attacks:** Implementation of a computer opponent that can intelligently target and fire back at the player's grid.
+*   [ ] **Custom Rule Injection:** Interfaces to easily script custom game modifiers (e.g., ammo limits, radar sweeps).
+*   [ ] **Local High Scores:** Extended serialization for the Stat Tracker.
+
+---
+
+## 💻 How to Use
+
+*Detailed implementation guides, code snippets, and API documentation will be provided here as the library approaches its stable v1.0 release.*
+
+### Quick Start Preview (Concept)
+```csharp
+// Initialize the engine with a 10x10 grid
+var engine = new BattleEngine(rows: 10, cols: 10);
+
+// Add custom ships
+engine.RegisterShip("Submarine", length: 3);
+engine.RegisterShip("Carrier", length: 5);
+
+// Start the match
+engine.StartGame();
