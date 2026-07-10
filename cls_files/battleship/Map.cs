@@ -14,6 +14,8 @@ namespace BattleShipCollection
         private List<Coordinate> missedShots = new List<Coordinate>();
         private List<Coordinate> hitShots = new List<Coordinate>();
 
+        public event EventHandler GameWon;
+
         public int XSize
         {
             get { return this.xSize; }
@@ -56,6 +58,7 @@ namespace BattleShipCollection
         {
             this.xSize = cXSize;
             this.ySize = cYSize;
+            this.shotResult = "";
         }
 
         private void AddShipToActiveregister(BattleShip Ship)
@@ -76,11 +79,14 @@ namespace BattleShipCollection
                 Coordinate startPoint = DetermineStartPoint();
                 PlotRestOfTheShip(ShipWhoNeedsCoords, startPoint);
                 AddShipToActiveregister(ShipWhoNeedsCoords);
-                Console.WriteLine($"{ShipWhoNeedsCoords.Name}");
-                ShipWhoNeedsCoords.DisplayShipCoords();
             }
 
         }//PlotShips()
+
+        protected virtual void OnGameWon(EventArgs e)
+        {
+            GameWon?.Invoke(this, e);
+        }
 
         private Coordinate DetermineStartPoint()
         {
@@ -387,6 +393,25 @@ namespace BattleShipCollection
             
         }
 
+        public CoordStates GetCoordState(int x, int y)
+        {
+            Coordinate givenCoord = ConvertIntsToCoord(x, y);
+            CoordStates coordState = default;
+            //Check if occupied by ship
+            if (IsMiss(givenCoord))
+            {
+                coordState = CoordStates.MISS;
+            }
+            else if (IsHit(givenCoord))
+            {
+                coordState = CoordStates.HIT;
+            }
+            else { coordState = CoordStates.WATER; }
+
+            return coordState;
+
+        }
+
         public Coordinate ConvertIntsToCoord(int x, int y)
         {
             return new Coordinate(x, y);
@@ -418,6 +443,12 @@ namespace BattleShipCollection
                 //Not Hit
                 MissedShots.Add(shotCoord);
                 ShotResult = "Shot was a Miss.";
+            }
+
+            //Check if game is won
+            if (CheckWinCondition())
+            {
+                GameWon?.Invoke(this, EventArgs.Empty);
             }
         }
 
@@ -462,9 +493,18 @@ namespace BattleShipCollection
             return foundShip;
         }
 
-        private bool CheckWinConditipon()
+        private bool CheckWinCondition()
         {
-            return true;
+            if (activeShips.Count == 0)
+            {
+                return true;
+            }
+            else { return false; }
+        }
+
+        public int GetAmountOfShots()
+        {
+            return HitShots.Count + MissedShots.Count;
         }
     }
 

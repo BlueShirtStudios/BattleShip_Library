@@ -50,7 +50,7 @@ namespace BattleShipCollection
 
         public string GenerateShipKey()
         {
-            return $"{this.Length}DotShip";
+            return $"{this.Length}DotShip{Name.Substring(0, 2)}";
         }
 
         public bool IsInXPos(int x)
@@ -81,6 +81,7 @@ namespace BattleShipCollection
             return false;
         }
 
+        //Test Method here
         public void DisplayShipCoords()
         {
             foreach(Coordinate coord in occupiedCoordinates)
