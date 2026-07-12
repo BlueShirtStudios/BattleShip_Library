@@ -14,8 +14,6 @@ namespace BattleShipCollection
         private List<Coordinate> missedShots = new List<Coordinate>();
         private List<Coordinate> hitShots = new List<Coordinate>();
 
-        public event EventHandler GameWon;
-
         public int XSize
         {
             get { return this.xSize; }
@@ -157,7 +155,7 @@ namespace BattleShipCollection
             {
                 MapEncounterdError("An error occurred while findign a startpoint", Convert.ToString(e));
             }
-            
+
 
             return newStartPoint;
 
@@ -267,7 +265,7 @@ namespace BattleShipCollection
             {
                 MapEncounterdError("An error occured while plotting rest of ship", Convert.ToString(e));
             }
-            
+
 
         }
 
@@ -324,140 +322,7 @@ namespace BattleShipCollection
             return coordinateFound;
         }
 
-        private void MapEncounterdError(string msg, string strError = "")
-        {
-            if (String.IsNullOrEmpty(strError))
-            {
-                Console.WriteLine(msg);
-            }
-            else
-            {
-                Console.WriteLine($"{msg}: {strError}");
-            }
-                
-        }
-
-        private bool IsActiveRegistryEmpty()
-        {
-            if (activeShips.Count == 0)
-            {
-                return true;
-            }
-            else
-            {
-                return false;
-            }
-        }
-
-        private bool IsMiss(Coordinate givenCoord)
-        {
-            foreach(Coordinate coord in MissedShots)
-            {
-                if ((coord.X == givenCoord.X) && (coord.Y == givenCoord.Y))
-                {
-                    return true;
-                }
-            }
-
-            return false;
-        }
-
-        private bool IsHit(Coordinate givenCoord)
-        {
-            foreach (Coordinate coord in HitShots)
-            {
-                if ((coord.X == givenCoord.X) && (coord.Y == givenCoord.Y))
-                {
-                    return true;
-                }
-            }
-
-            return false;
-        }
-
-        public CoordStates GetCoordState(Coordinate givenCoord)
-        {
-            CoordStates coordState = default;
-            //Check if occupied by ship
-            if (IsMiss(givenCoord))
-            {
-                coordState = CoordStates.MISS;
-            }
-            else if (IsHit(givenCoord))
-            {
-                coordState = CoordStates.HIT;
-            }
-            else { coordState = CoordStates.WATER; }
-
-            return coordState;
-            
-        }
-
-        public CoordStates GetCoordState(int x, int y)
-        {
-            Coordinate givenCoord = ConvertIntsToCoord(x, y);
-            CoordStates coordState = default;
-            //Check if occupied by ship
-            if (IsMiss(givenCoord))
-            {
-                coordState = CoordStates.MISS;
-            }
-            else if (IsHit(givenCoord))
-            {
-                coordState = CoordStates.HIT;
-            }
-            else { coordState = CoordStates.WATER; }
-
-            return coordState;
-
-        }
-
-        public Coordinate ConvertIntsToCoord(int x, int y)
-        {
-            return new Coordinate(x, y);
-        }
-
-        public void FireShot(int x, int y)
-        {
-            //Initialize
-            Coordinate shotCoord = new Coordinate(x, y);
-
-            //Checks if a ship has that coordinates
-            BattleShip shipThatWasHit = DoesShipHaveCoordinate(shotCoord);
-            if (shipThatWasHit != null)
-            {
-                //It was a hit
-                ShotResult = "Shot was a Hit!";
-                shipThatWasHit.Health = shipThatWasHit.Health - 20;
-                shipThatWasHit.OccupiedCoordinates.Remove(shotCoord);
-                if (shipThatWasHit.Health == 0)
-                {
-                    activeShips.Remove(shipThatWasHit.GenerateShipKey(), out shipThatWasHit);
-                    ShotResult = SunkMessage(shipThatWasHit);
-                }
-                HitShots.Add(shotCoord);
-                
-            }
-            else if (shipThatWasHit == null)
-            {
-                //Not Hit
-                MissedShots.Add(shotCoord);
-                ShotResult = "Shot was a Miss.";
-            }
-
-            //Check if game is won
-            if (CheckWinCondition())
-            {
-                GameWon?.Invoke(this, EventArgs.Empty);
-            }
-        }
-
-        private string SunkMessage(BattleShip sunkenShip)
-        {
-            return $"You have sunk the enemy's {sunkenShip.Name}, well done!";
-        }
-
-        private BattleShip DoesShipHaveCoordinate(Coordinate givenCoordinates)
+        public BattleShip DoesShipHaveCoordinate(Coordinate givenCoordinates)
         {
             bool coordinateFound = false;
             BattleShip foundShip = default;
@@ -493,35 +358,39 @@ namespace BattleShipCollection
             return foundShip;
         }
 
-        private bool CheckWinCondition()
+        private void MapEncounterdError(string msg, string strError = "")
+        {
+            if (String.IsNullOrEmpty(strError))
+            {
+                Console.WriteLine(msg);
+            }
+            else
+            {
+                Console.WriteLine($"{msg}: {strError}");
+            }
+
+        }
+
+        private bool IsActiveRegistryEmpty()
         {
             if (activeShips.Count == 0)
             {
                 return true;
             }
-            else { return false; }
+            else
+            {
+                return false;
+            }
         }
 
-        public int GetAmountOfShots()
+        public enum Directions
         {
-            return HitShots.Count + MissedShots.Count;
+            LEFT,
+            RIGHT,
+            UP,
+            DOWN
         }
-    }
 
-    public enum Directions
-    {
-        LEFT,
-        RIGHT,
-        UP,
-        DOWN
-    }
-
-    public enum CoordStates
-    {
-        HIT,
-        MISS,
-        WATER,
-        SHIP
     }
 }
 
