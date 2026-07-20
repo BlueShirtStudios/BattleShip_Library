@@ -81,11 +81,6 @@ namespace BattleShipCollection
 
         }//PlotShips()
 
-        protected virtual void OnGameWon(EventArgs e)
-        {
-            GameWon?.Invoke(this, e);
-        }
-
         private Coordinate DetermineStartPoint()
         {
             //Initialize
@@ -119,8 +114,8 @@ namespace BattleShipCollection
                                 //Update Coordinate Generator
                                 coordinateGenerator.availableX.Remove(newStartPoint.X);
                                 coordinateGenerator.availableY.Remove(newStartPoint.Y);
-                                coordinateGenerator.XLast = coordinateGenerator.XLast - 1;
-                                coordinateGenerator.YLast = coordinateGenerator.YLast - 1;
+                                coordinateGenerator.XLast = coordinateGenerator.XLast--;
+                                coordinateGenerator.YLast = coordinateGenerator.YLast--;
 
                                 //Exit both loops
                                 coordinateFound = true;

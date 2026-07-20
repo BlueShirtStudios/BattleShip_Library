@@ -74,11 +74,16 @@ namespace BattleShipCollection
             }
 
         }
-        public void AddShipToPlayerMap(string shipName, int width, int height)
+        public void AddShipMaps(string shipName, int width, int height)
         {
+            //Add a ship of your design to game map
             try
             {
+                //Add a ship to the Player's Map
                 PlayerMap.AddShip(new BattleShip(shipName, width, height));
+
+                //It will also add a ship of the same specifications to the Bot's map
+                BotMap.AddShip(new BattleShip(shipName, width, height));
             }
             catch
             {
@@ -88,6 +93,8 @@ namespace BattleShipCollection
 
         public void Initialize1WayGame()
         {
+            //Initialize the game if only the player fires
+
             //Player Ships
             BotMap.PlotShips();
 
@@ -97,6 +104,8 @@ namespace BattleShipCollection
 
         public void Initialize2WayGAame()
         {
+            //Initialize the game if we want the player to fire and a bot to fire back
+
             //Player Ships being plotted
             PlayerMap.PlotShips();
 
@@ -107,8 +116,12 @@ namespace BattleShipCollection
 
         public void AttemptShot(int x, int y)
         {
+            //Outward Facing Method allowing the Player to make a shot at a ship. It updated the messages for each entity on a hit.
+
+            //Formats to Coordinate Format
             Coordinate attemptedShot = new Coordinate(x, y);
 
+            //Depending on the game mode, the certain shoor action will be used
             if (GameMode == GameModes.ONEWAY)
             {
                 try
@@ -142,8 +155,31 @@ namespace BattleShipCollection
 
         public string GetBotCoordinateState(int x, int y)
         {
-            CoordStates state = BotMap.GetCoordState(x, y);
-            return Convert.ToString(state);
+            //Outward Facing Method allowing access to the status of the Coordinate.
+            try
+            {
+                CoordStates state = GetCoordState(new Coordinate(x, y), BotMap);
+                return Convert.ToString(state);
+            }
+            catch
+            {
+                return "No Coordinate Found.";
+            }
+
+        }
+
+        public string GetPlayerCoordinateState(int x, int y)
+        {
+            //Outward Facing Method allowing access to the status of the Coordinate.
+            try
+            {
+                CoordStates state = GetCoordState(new Coordinate(x, y), PlayerMap);
+                return Convert.ToString(state);
+            }
+            catch
+            {
+                return "No Coordinate Found.";
+            }
 
         }
 
@@ -159,20 +195,33 @@ namespace BattleShipCollection
 
         public List<string> GetAllAvailableModes()
         {
+            //Creates a list of all available game modes avialable and returns a List
             List<string> modes = new List<string>();
-            foreach (GameModes mode in Enum.GetValues(typeof(GameModes)))
+            try
             {
-                
-                modes.Add(Convert.ToString(mode));
+                //Builds list from our enum
+                foreach (GameModes mode in Enum.GetValues(typeof(GameModes)))
+                {
+                    if (mode != null)
+                    {
+                        modes.Add(Convert.ToString(mode));
+                    }
 
+                }
+
+                //Returns the list with the fomated enum values
+                return modes;
             }
-
-            return modes;
-
+            catch
+            {
+                //Error handling
+                return modes;
+            }
         }
 
         private bool IsMiss(Coordinate givenCoord, Map passedMap)
         {
+            //Goes through past shots to check it is added to missed shots list
             foreach (Coordinate coord in passedMap.MissedShots)
             {
                 if ((coord.X == givenCoord.X) && (coord.Y == givenCoord.Y))
@@ -186,6 +235,7 @@ namespace BattleShipCollection
 
         private bool IsHit(Coordinate givenCoord, Map passedMap)
         {
+            //Goes through past shots to check it is added to hit shots list
             foreach (Coordinate coord in passedMap.HitShots)
             {
                 if ((coord.X == givenCoord.X) && (coord.Y == givenCoord.Y))
@@ -199,6 +249,8 @@ namespace BattleShipCollection
 
         private CoordStates GetCoordState(Coordinate givenCoord, Map passedMap)
         {
+            //Returns the state of a coordinate
+
             CoordStates coordState = default;
             //Check if occupied by ship
             if (IsMiss(givenCoord, passedMap))
@@ -215,28 +267,9 @@ namespace BattleShipCollection
 
         }
 
-        public CoordStates GetCoordState(int x, int y)
-        {
-            Coordinate givenCoord = new Coordinate(x, y);
-            CoordStates coordState = default;
-            //Check if occupied by ship
-            if (IsMiss(givenCoord))
-            {
-                coordState = CoordStates.MISS;
-            }
-            else if (IsHit(givenCoord))
-            {
-                coordState = CoordStates.HIT;
-            }
-            else { coordState = CoordStates.WATER; }
-
-            return coordState;
-
-        }
-
         private string Fireshot(Coordinate shotCoord, Map firedMap)
         {
-            //Checks if a ship has that coordinates on the bot map
+            //Checks if a ship has that coordinates on the map that was shot
             BattleShip shipThatWasHit = firedMap.DoesShipHaveCoordinate(shotCoord);
             string msg = default;
 
@@ -245,7 +278,7 @@ namespace BattleShipCollection
             {
                 //It was a hit
                 msg = "Shot was a Hit!";
-                shipThatWasHit.Health = shipThatWasHit.Health - 20;
+                shipThatWasHit.Health -= 20;
                 shipThatWasHit.OccupiedCoordinates.Remove(shotCoord);
                 if (shipThatWasHit.Health == 0)
                 {
@@ -263,7 +296,7 @@ namespace BattleShipCollection
             }
 
             //Check if game is won
-            if (CheckWinCondition())
+            if (CheckWinCondition(firedMap))
             {
                 GameWon?.Invoke(this, EventArgs.Empty);
             }
@@ -286,7 +319,7 @@ namespace BattleShipCollection
             else { return false; }
         }
 
-        public int GetAmountOfShots(Map passedMap)
+        private int GetAmountOfShots(Map passedMap)
         {
             return passedMap.HitShots.Count + passedMap.MissedShots.Count;
         }
@@ -301,10 +334,9 @@ namespace BattleShipCollection
     }
 
     public enum GameModes
-        {
+    {
             ONEWAY,
             TWOWAY
-        }
+        
     }
 }
-
