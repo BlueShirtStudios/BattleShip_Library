@@ -1,5 +1,6 @@
 ﻿using fileHandlerComponents;
 using System;
+using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 using System.Security.Cryptography.X509Certificates;
 using static BattleShipCollection.Map;
@@ -13,6 +14,7 @@ namespace BattleShipCollection
         private string messageFromPlayerResult;
         private string messageFromBotResult;
         private GameModes gameMode;
+        private BotModes botMode;
         private CoordinateGenerator coordGenerator = default;
 
         public event EventHandler GameWon;
@@ -45,6 +47,13 @@ namespace BattleShipCollection
             get { return this.gameMode; }
             set { this.gameMode = value; }
         }
+            
+
+        public BotModes BotMode
+        {
+            get { return this.botMode; }
+            set { this.botMode = value; }
+        }
 
         public CoordinateGenerator CoordGenerator
         {
@@ -52,9 +61,59 @@ namespace BattleShipCollection
             set { this.coordGenerator = value; }
         }
 
-        public void SelectGameMode(string gameMode)
+        public void SelectGameMode(string strMode)
         {
+            try
+            {
+                //Extract from input which is used to determine the mode
+                int mode = Convert.ToInt32(strMode[0].ToString());
 
+                //Assign the game mode
+                switch (mode)
+                {
+                    case 1:
+                        GameMode = GameModes.ONEWAY;
+                        break;
+
+                    case 2:
+                        GameMode = GameModes.TWOWAY;
+                        break;
+
+                    default:
+                        GameMode = GameModes.NOWAY;
+                        break;
+                }
+            }
+            catch
+            {
+                GameMode = GameModes.NOWAY;
+            }
+        }
+
+        public void SelectGameMode(int mode)
+        {
+            try
+            {
+                //Assign the game mode
+                switch (mode)
+                {
+                    case 1:
+                        GameMode = GameModes.ONEWAY;
+                        break;
+
+                    case 2:
+                        GameMode = GameModes.TWOWAY;
+                        break;
+
+                    default:
+                        GameMode = GameModes.NOWAY;
+                        break;
+                }
+            }
+            catch
+            {
+                GameMode = GameModes.NOWAY;
+            }
         }
 
         public void CreateGameMap(int xSize, int ySize)
@@ -74,7 +133,7 @@ namespace BattleShipCollection
             }
 
         }
-        public void AddShipMaps(string shipName, int width, int height)
+        public void AddShipToMap(string shipName, int width, int height)
         {
             //Add a ship of your design to game map
             try
@@ -91,27 +150,47 @@ namespace BattleShipCollection
             }
         }
 
-        public void Initialize1WayGame()
+        private bool CanWeInitializeGame()
+        {
+            if (GameMode != GameModes.NOWAY)
+            {
+                return true;
+            }
+            else { return false; }
+        }
+
+        public void InitializeGame()
         {
             //Initialize the game if only the player fires
 
-            //Player Ships
-            BotMap.PlotShips();
+            //Checks if a game mode was selected
+            if (!CanWeInitializeGame())
+            {
+                //error handling / message
+                System.Environment.Exit(0);
+            }
 
-            //Set events
-           // BotMap.GameWon += this.HandleVictory;
-        }
+            //Checks which game was activated 
+            switch (GameMode)
+            {
+                case GameModes.ONEWAY:
+                    //Player Ships
+                    BotMap.PlotShips();
+                    break;
 
-        public void Initialize2WayGAame()
-        {
-            //Initialize the game if we want the player to fire and a bot to fire back
+                case GameModes.TWOWAY:
+                    //Player Ships being plotted
+                    PlayerMap.PlotShips();
 
-            //Player Ships being plotted
-            PlayerMap.PlotShips();
+                    //Bot ship being plotted
+                    BotMap.PlotShips();
+                    break;
 
-            //Bot ship being plotted
-            BotMap.PlotShips();
-
+                default:
+                    //error handling here
+                    break;
+            }
+            
         }
 
         public void AttemptShot(int x, int y)
@@ -143,6 +222,7 @@ namespace BattleShipCollection
                     MessageFromPlayerResult = Fireshot(attemptedShot, BotMap);
 
                     //The Bot fires back
+                    MessageFromBotResult = LetBotFireBack();
                 }
                 catch (Exception e)
                 {
@@ -301,6 +381,7 @@ namespace BattleShipCollection
                 GameWon?.Invoke(this, EventArgs.Empty);
             }
 
+            //Returns the message crafted based on shot outcome.
             return msg;
         }
 
@@ -323,6 +404,19 @@ namespace BattleShipCollection
         {
             return passedMap.HitShots.Count + passedMap.MissedShots.Count;
         }
+
+        private string LetBotFireBack()
+        {
+
+            string msg = default;
+            if (BotMode == BotModes.EASY)
+            {
+                Coordinate botShot = coordGenerator.GenerateNewCoordinate();
+                msg = Fireshot(botShot, PlayerMap);
+            }
+
+            return msg;
+        }
     }
 
     public enum CoordStates
@@ -335,8 +429,14 @@ namespace BattleShipCollection
 
     public enum GameModes
     {
-            ONEWAY,
-            TWOWAY
+        NOWAY,
+        ONEWAY,
+        TWOWAY
         
+    }
+
+    public enum BotModes
+    {
+        EASY
     }
 }
