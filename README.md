@@ -17,6 +17,7 @@ Whether you want to build a mini-game inside a larger project, create an educati
 ## 🚀 Current Features
 
 *   **Single-Player Ready:** Easily initialize a game grid and deploy a fleet for a player to interact with.
+*   **Player VS AI:** Supports playing against an AI that attacks back as you shoot.
 *   **Targeting System:** Built-in coordinate validation and hit/miss/sink state tracking.
 *   **Stat Tracker:** Persistent or session-based tracking to monitor player performance, accuracy, and win rates across multiple matches.
 
@@ -24,9 +25,7 @@ Whether you want to build a mini-game inside a larger project, create an educati
 
 ## 🗺️ Roadmap & Upcoming Features
 
-> ⚠️ **Note on Current State:** The library currently supports player-to-grid interaction (firing at an enemy fleet). Full turn-based AI counter-attacks are actively being developed.
-
-*   [ ] **AI Counter-Attacks:** Implementation of a computer opponent that can intelligently target and fire back at the player's grid.
+*   [ ] **Inteligent AI Counter-Attacks:** Implementation of a computer opponent that can intelligently target and fire back at the player's grid.
 *   [ ] **Custom Rule Injection:** Interfaces to easily script custom game modifiers (e.g., ammo limits, radar sweeps).
 *   [ ] **Local High Scores:** Extended serialization for the Stat Tracker.
 
