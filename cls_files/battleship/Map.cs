@@ -13,6 +13,7 @@ namespace BattleShipCollection
         private Dictionary<string, BattleShip> activeShips = new Dictionary<string, BattleShip>();
         private List<Coordinate> missedShots = new List<Coordinate>();
         private List<Coordinate> hitShots = new List<Coordinate>();
+        private string owner;
 
         public int XSize
         {
@@ -52,11 +53,18 @@ namespace BattleShipCollection
             get { return this.hitShots; }
         }
 
-        public Map(int cXSize, int cYSize)
+        public string Owner
+        {
+            get { return this.owner; }
+            set { this.owner = value; }
+        }
+
+
+        public Map(int cXSize, int cYSize, string cOwner)
         {
             this.xSize = cXSize;
             this.ySize = cYSize;
-            this.shotResult = "";
+            this.owner = cOwner;
         }
 
         private void AddShipToActiveregister(BattleShip Ship)

@@ -92,6 +92,12 @@ namespace BattleShipCollection
             }
         }
 
+        public void TakeDamage(Coordinate coord)
+        {
+            Health -= 20;
+            OccupiedCoordinates.Remove(coord);
+        }
+
     }
 
 }//namespace
