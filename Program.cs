@@ -11,11 +11,11 @@ class BattleMathConsoleVersion
         BattleShipCollection.BattleEngine battleEngine = new BattleEngine();
 
         //Initialize the game
-        //Specify the map size
-        battleEngine.CreateGameMap(2, 3);
-
         //Select the mode you want to play - it takes string of integer
         battleEngine.SelectGameMode("2Way");
+
+        //Specify the map size
+        battleEngine.CreateGameMap(2, 3);
 
         //Add Ships
         battleEngine.AddShipToMap("Small", 1, 2);
