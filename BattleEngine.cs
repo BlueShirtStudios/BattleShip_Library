@@ -17,8 +17,6 @@ namespace BattleShipCollection
         //Properties
         private GameModes gameMode;
         private BotModes botMode;
-        private Map playerMap = default;
-        private Map botMap = default;
         private CoordinateGenerator coordGenerator = default;
         private Dictionary<BasePlayer, Map> activePlayRegistry = new();
         private ProfileManagerComponents.ProfileManager profileManager = new();
@@ -32,16 +30,6 @@ namespace BattleShipCollection
 
         //Internal Events
         internal event EventHandler<BattleEventArgs.ShotResultEventArgs>? OnHit;
-
-        private Map PlayerMap
-        {
-            get { return this.playerMap; }
-        }
-
-        private Map BotMap
-        {
-            get { return this.botMap; }
-        }
 
         private GameModes GameMode
         {
@@ -250,7 +238,7 @@ namespace BattleShipCollection
         {
             //Get Active Player and its target map
             BasePlayer activePlayer = GetActivePlayer();
-            Map targetMap = activePlayer != null ? GetTargetMap(activePlayer) : null ;
+            Map targetMap = GetTargetMap(activePlayer);
 
             //Check if player is a bot and resolve coordinate allowcation if so
             Coordinate targetedCoordinate = ResolveBotCoords(activePlayer);
@@ -346,30 +334,6 @@ namespace BattleShipCollection
             {
                 NewAttemptShot(0, 0);
             }
-        }
-
-        private int GetNextOrPreviousIndex(int num)
-        {
-            //Based on the integer provided it will return the previous number or next one
-            if (num == 0)
-            {
-                num++;
-            }
-            else
-            {
-                num--;
-            }
-
-            return num;
-        }
-        private BasePlayer FetchPlayerFromRegister(int index)
-        {
-            var allKeys = ActivePlayRegistry.Keys.ToList();
-            if (index < allKeys.Count)
-            {
-                return allKeys[index];
-            }
-            else { return null; }
         }
         private void UpdateGameStats(BasePlayer activeShooter, int score)
         {
@@ -504,15 +468,6 @@ namespace BattleShipCollection
         private void RaiseGameEnd()
         {
             GameEnd?.Invoke(this, EventArgs.Empty);
-        }
-
-        private void RaiseOnHitEvent(ShotOutcome outcome, Coordinate firedCoords)
-        {
-            OnHit?.Invoke(this, new BattleEventArgs.ShotResultEventArgs(
-                outcome,
-                firedCoords.X,
-                firedCoords.Y
-                ));
         }
 
         private void RaiseShotResultEvent(ShotOutcome outcome, int x, int y)
