@@ -1,4 +1,5 @@
-﻿using System;
+﻿using BattleShipCollection;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -10,9 +11,9 @@ namespace BattleEventArgs
     {
         public int X { get; }
         public int Y { get; }
-        public string Result { get; }
+        public ShotOutcome Result { get; }
 
-        public ShotResultEventArgs(string cResult, int cX, int cY)
+        public ShotResultEventArgs(ShotOutcome cResult, int cX, int cY)
         {
             this.X = cX;
             this.Y = cY;
