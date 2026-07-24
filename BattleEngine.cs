@@ -9,6 +9,8 @@ using System.Linq;
 using static BattleShipCollection.Map;
 using BattleEventArgs;
 using BattlePlayers;
+using BattleExceptions;
+using BattleEnumCollection;
 using System.Formats.Asn1;
 
 namespace BattleShipCollection
@@ -27,9 +29,7 @@ namespace BattleShipCollection
         public event EventHandler<BattleEventArgs.ShotResultEventArgs>? ShotAttempt;
         public event EventHandler<BattleEventArgs.GameLossEventArgs>? GameLoose;
         public event EventHandler? GameEnd;
-
-        //Internal Events
-        internal event EventHandler<BattleEventArgs.ShotResultEventArgs>? OnHit;
+        public event EventHandler<BattleEventArgs.ErrorEventArgs>? ErrorOccurred;
 
         private GameModes GameMode
         {
@@ -167,23 +167,15 @@ namespace BattleShipCollection
             }
 
         }
-        public void AddShipToMap(string shipName, int width, int length)
+        private void AddShipsToMap(List<BattleShip> shipList)
         {
-            //Add a ship of your design to game map
-            try
+            foreach (KeyValuePair<BasePlayer, Map> register in ActivePlayRegistry)
             {
-                foreach (KeyValuePair<BasePlayer, Map> register in ActivePlayRegistry)
+                Map currentMap = register.Value;
+                foreach(BattleShip ship in shipList)
                 {
-                    //Checks if a key has a map object, else it will not add the created boat
-                    if (register.Value != null)
-                    {
-                        register.Value.AddShip(new BattleShip(shipName, width, length));
-                    }
+                    currentMap.AddShip(ship);
                 }
-            }
-            catch
-            {
-                //error handeling
             }
         }
 
@@ -196,17 +188,26 @@ namespace BattleShipCollection
             else { return false; }
         }
 
-        public void InitializeGame()
+        public void InitializeGame(EngineConfig cfg)
         {
-            //Checks if a game mode was selected
-            if (!CanWeInitializeGame())
+            try
             {
-                //error handling / message
-                System.Environment.Exit(0);
-            }
+                //Extract configuration data from config object
+                GameMode = cfg.GameMode;
+                BotMode = cfg.Difficulty;
+                BuildActiveRegistry(GameMode, cfg.xSize, cfg.ySize);
 
-            //Plots the ships on the map
-            PlotShipsOnAllMaps();
+                //Add the requested ships to the map
+                AddShipsToMap(cfg.RequesteShips);
+
+                //Plots the ships on the map
+                PlotShipsOnAllMaps();
+            }
+            catch
+            {
+
+            }
+            
         }
 
         private void BuildActiveRegistry(GameModes mode, int x, int y)
@@ -253,12 +254,33 @@ namespace BattleShipCollection
         {
             try
             {
+                //Activates Player Turn
                 StartPlayerTurn();
+
+                //Shoots at chosen coordinates
                 NewAttemptShot(new Coordinate(x, y));
             }
-            catch
+            catch(Exception e)
             {
-                //error handling
+                RaiseErrorEvent("Unkown Error Occured", e);
+            }
+        }
+
+        private void RaiseErrorEvent(string msg, Exception e)
+        {
+            ErrorOccurred?.Invoke(this, new BattleEventArgs.ErrorEventArgs(
+                msg,
+                e));
+        }
+
+        private void CheckType(object given, object expected)
+        {
+            if (given.GetType() != expected.GetType())
+            {
+                throw new InputException(
+                    expected,
+                    given,
+                    "Invalid Input has been provided");
             }
         }
 
@@ -523,20 +545,4 @@ namespace BattleShipCollection
     
 
     }//battle engine class
-
-    public enum GameModes
-    {
-        NOWAY,
-        ONEWAY,
-        TWOWAY
-        
-    }
-
-    public enum ShotOutcome
-    {
-        NONE,
-        HIT,
-        MISS,
-        SUNK
-    }
 }

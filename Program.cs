@@ -7,21 +7,19 @@ class BattleMathConsoleVersion
     static void Main()
     {
         //This is a test file so that I can test as I develop. This will be changed to a library when it is in a more working condition
-        //Create an instance of the object
-        BattleShipCollection.BattleEngine battleEngine = new BattleEngine();
+        //Create an instance of the battle engine and its configuration object
+        var battleEngine = new BattleEngine();
+        var engineCfg = new EngineConfig(
+                            "2WAY",//Game Node
+                            "Medium",//Game/Bot Difficulty
+                            2,//Map max size in x
+                            3);//Map max size in y
 
-        //Initialize the game
-        //Select the mode you want to play - it takes string of integer
-        battleEngine.SelectGameMode("2Way");
+        //Add ship to roster
+        engineCfg.AddShipToRoster("Small", 1, 2);
 
-        //Select the diffuculty for the bot - only used for 2 way game
-        battleEngine.SelectBotDifficulty("Medium");
-
-        //Specify the map size
-        battleEngine.CreateGameMap(2, 3);
-
-        //Add Ships
-        battleEngine.AddShipToMap("Small", 1, 2);
+        //Pass the configuration obeject to the initilization method
+        battleEngine.InitializeGame(engineCfg);
 
         //Subscribe to the events
         battleEngine.ShotAttempt += (sender, e) =>
@@ -52,10 +50,11 @@ class BattleMathConsoleVersion
         };
 
         battleEngine.GameEnd += OnGameEnd;
-        
 
-        //Call the initialze method
-        battleEngine.InitializeGame();
+        battleEngine.ErrorOccurred += (sender, e) =>
+        {
+            Console.WriteLine($"{e.Msg}: {e.Error}");
+        };
 
         //Attempt Shots
         battleEngine.AttemptShot(1, 1);

@@ -1,4 +1,5 @@
-﻿using BattleShipCollection;
+﻿using BattleEnumCollection;
+using BattleShipCollection;
 
 namespace BattlePlayers
 {
