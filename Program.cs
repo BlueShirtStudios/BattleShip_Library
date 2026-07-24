@@ -14,6 +14,9 @@ class BattleMathConsoleVersion
         //Select the mode you want to play - it takes string of integer
         battleEngine.SelectGameMode("2Way");
 
+        //Select the diffuculty for the bot - only used for 2 way game
+        battleEngine.SelectBotDifficulty("Medium");
+
         //Specify the map size
         battleEngine.CreateGameMap(2, 3);
 
@@ -67,5 +70,6 @@ class BattleMathConsoleVersion
     private static void OnGameEnd(object? sender, EventArgs e)
     {
         Console.WriteLine("The game has ended!");
+        System.Environment.Exit(0);
     }
 }

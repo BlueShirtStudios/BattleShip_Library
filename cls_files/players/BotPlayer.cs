@@ -5,28 +5,42 @@ namespace BattlePlayers
     public class BotPlayer : BasePlayer
     {
         public BotModes Difficulty { get; set; }
-        public Coordinate PreviousCoordiate { get; set; }
-        public ShotOutcome CoordinateOutcome { get; set; }
+        public BotMoves Moves { get; set; }
 
-        public BotPlayer(BotModes diff, UserProfile profile) : base(profile)
+        public BotPlayer(BotModes diff, UserProfile profile, CoordinateGenerator coordGene) : base(profile)
         {
             this.Difficulty = diff;
+            this.Moves = new BotMoves(coordGene);
         }
 
         public void UpdateShotOutcome(ShotOutcome outcome, Coordinate coord)
         {
-            PreviousCoordiate = coord;
-            CoordinateOutcome = outcome;
+            this.Moves.CoordinateOutcome = outcome;
+            this.Moves.PreviousCoordiate = coord;
         }
 
         public Coordinate CalculateNextCoordinate()
         {
-            return new Coordinate(0,0);
+            Coordinate chosenCoord = default;
+
+            //Calls method based on the difficulty of bot
+            if (Difficulty == BotModes.EASY)
+            {
+                chosenCoord = Moves.DetermineMoveEasy();
+            }
+
+            else if (Difficulty == BotModes.MEDIUM)
+            {
+                chosenCoord = Moves.DetermineMoveMedium();
+            }
+
+            return chosenCoord;
         }
     }
 
     public enum BotModes
     {
+        NODIFF,
         EASY,
         MEDIUM,
         CHEATER,

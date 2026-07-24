@@ -9,6 +9,7 @@ using System.Linq;
 using static BattleShipCollection.Map;
 using BattleEventArgs;
 using BattlePlayers;
+using System.Formats.Asn1;
 
 namespace BattleShipCollection
 {
@@ -17,7 +18,6 @@ namespace BattleShipCollection
         //Properties
         private GameModes gameMode;
         private BotModes botMode;
-        private CoordinateGenerator coordGenerator = default;
         private Dictionary<BasePlayer, Map> activePlayRegistry = new();
         private ProfileManagerComponents.ProfileManager profileManager = new();
 
@@ -41,12 +41,6 @@ namespace BattleShipCollection
         {
             get { return this.botMode; }
             set { this.botMode = value; }
-        }
-
-        public CoordinateGenerator CoordGenerator
-        {
-            get { return this.coordGenerator; }
-            set { this.coordGenerator = value; }
         }
 
         public Dictionary<BasePlayer, Map> ActivePlayRegistry
@@ -115,6 +109,50 @@ namespace BattleShipCollection
             }
         }
 
+        public void SelectBotDifficulty(int diff)
+        {
+            switch (diff)
+            {
+                case 1:
+                    BotMode = BotModes.EASY;
+                    break;
+
+                case 2:
+                    BotMode = BotModes.MEDIUM;
+                    break;
+
+                default:
+                    BotMode = BotModes.NODIFF;
+                    break;
+            }
+        }
+
+        public void SelectBotDifficulty(string diff)
+        {
+            if (GameMode != GameModes.TWOWAY)
+            {
+                //raise error
+            }
+
+            //Get first letter of diff
+            char cDiff = Char.ToLower(diff[0]);
+
+            switch (cDiff)
+            {
+                case 'e':
+                    BotMode = BotModes.EASY;
+                    break;
+
+                case 'm':
+                    BotMode = BotModes.MEDIUM;
+                    break;
+
+                default:
+                    BotMode = BotModes.NODIFF;
+                    break;
+            }
+        }
+
         public void CreateGameMap(int xSize, int ySize)
         {
             try
@@ -122,8 +160,6 @@ namespace BattleShipCollection
                 //Build Active Registery
                 BuildActiveRegistry(GameMode, xSize, ySize);
 
-                //Create our coordinate generator
-                this.coordGenerator = new CoordinateGenerator(xSize, ySize);
             }
             catch (Exception e)
             {
@@ -175,6 +211,7 @@ namespace BattleShipCollection
 
         private void BuildActiveRegistry(GameModes mode, int x, int y)
         {
+            //Build our active regisrty, handling map creation and coordinate generator
             //Checks which game was activated 
             if (mode == GameModes.ONEWAY)
             {
@@ -182,8 +219,9 @@ namespace BattleShipCollection
             }
             else if (mode == GameModes.TWOWAY)
             {
+                //Create Player object and bot object and add to dictionary
                 ActivePlayRegistry.Add(CreatePlayerObject(ProfileManager.CreateUserProfile()), new Map(x, y));
-                ActivePlayRegistry.Add(CreateBotPlayerObject(ProfileManager.CreateBotProfile(), BotMode), new Map(x, y));
+                ActivePlayRegistry.Add(CreateBotPlayerObject(ProfileManager.CreateBotProfile(), BotMode, new CoordinateGenerator(x, y)), new Map(x, y));
             }
                 
         }
@@ -193,9 +231,9 @@ namespace BattleShipCollection
             return new Player(profile);
         }
 
-        private BasePlayer CreateBotPlayerObject(UserProfile profile, BotModes diff)
+        private BasePlayer CreateBotPlayerObject(UserProfile profile, BotModes diff, CoordinateGenerator coordGene)
         {
-            return new BotPlayer(diff, profile);
+            return new BotPlayer(diff, profile, coordGene);
         }
 
         private void PlotShipsOnAllMaps()
@@ -216,7 +254,7 @@ namespace BattleShipCollection
             try
             {
                 StartPlayerTurn();
-                NewAttemptShot(x, y);
+                NewAttemptShot(new Coordinate(x, y));
             }
             catch
             {
@@ -234,20 +272,11 @@ namespace BattleShipCollection
 
         }
 
-        private void NewAttemptShot(int x, int y)
+        private void NewAttemptShot(Coordinate targetedCoordinate)
         {
             //Get Active Player and its target map
             BasePlayer activePlayer = GetActivePlayer();
             Map targetMap = GetTargetMap(activePlayer);
-
-            //Check if player is a bot and resolve coordinate allowcation if so
-            Coordinate targetedCoordinate = ResolveBotCoords(activePlayer);
-
-            //Create coordinate if active player is a actual person
-            if ((targetedCoordinate.X == 0) || (targetedCoordinate.Y == 0))
-            {
-                targetedCoordinate = new Coordinate(x, y);
-            }
 
             //Fires a shot on the active map
             ShotOutcome outcome = Fireshot(targetedCoordinate, targetMap);
@@ -274,14 +303,16 @@ namespace BattleShipCollection
             return targetMap != null ? targetMap : null;
         }
 
-        private Coordinate ResolveBotCoords(BasePlayer player)
+        private Coordinate ResolveBotCoords(BotPlayer bot)
         {
-           if (player is BotPlayer bot)
-           {
-                return bot.CalculateNextCoordinate();
-           }
+            //Get the oppenent map with shot history
+            Map targetMap = GetTargetMap(GetOppenentPlayer());
 
-            return new Coordinate(0,0);
+            //Update stats for the bot to use
+            bot.Moves.UpdateCoordinateRegister(targetMap.HitShots, targetMap.MissedShots);
+
+            //Return the calculated coordinate
+            return bot.CalculateNextCoordinate();    
         }
 
         private void UpdateBotShotResult(BasePlayer player, Coordinate coord, ShotOutcome outcome)
@@ -330,11 +361,17 @@ namespace BattleShipCollection
             currentAcivePlayer.GameData.EndTurn();
             currentInactivePlayer.GameData.ActivateTurn();
 
-            if (currentInactivePlayer is BotPlayer)
+            //If the inactive player of the round was a bot
+            if (currentInactivePlayer is BotPlayer bot)
             {
-                NewAttemptShot(0, 0);
+                //Generate a coordinate that the bot will use to fire
+                Coordinate BotSelectedCoordinate = ResolveBotCoords(bot);
+
+                //Fires at the player's fleet
+                NewAttemptShot(BotSelectedCoordinate);
             }
         }
+
         private void UpdateGameStats(BasePlayer activeShooter, int score)
         {
             activeShooter.GameData.UpdateScore(score);
