@@ -4,107 +4,119 @@ namespace BattleShipCollection
 {
     public class CoordinateGenerator
     {
-        public List<int> availableX = new List<int>();
-        public List<int> availableY = new List<int>();
+        private  List<int> availableX = new List<int>();
+        private List<int> availableY = new List<int>();
         private Random randomGene = new Random();
-        private int xFirst;
-        private int xLast;
-        private int yFirst;
-        private int yLast;
-        private int xIndex;
-        private int yIndex;
+        public int XFirst { get; set; }
+        public int XLast { get; set; }
+        public int YFirst { get; set; }
+        public int YLast { get; set; }
+        public int XIndex { get; set; }
+        public int YIndex { get; set; }
+        public int XBoundryMax { get; set; }
+        private int YBoundryMax { get; set; }
 
-        public int XFirst
+        private List<int> AvailableX
         {
-            get { return this.xFirst; }
-            set { this.xFirst = value; }
+            get { return this.availableX; }
+            set { this.availableX = value; }
         }
-        public int XLast
+        private List<int> AvailableY
         {
-            get { return this.xLast; }
-            set { this.xLast = value; }
+            get { return this.availableY; }
+            set { this.availableY = value; }
         }
-
-        public int YFirst
+        private Random RandomGene
         {
-            get { return this.yFirst; }
-            set { this.yFirst = value; }
-        }
-
-        public int YLast
-        {
-            get { return this.yLast; }
-            set { this.yLast = value; }
+            get { return this.randomGene; }
         }
 
-        public int XIndex
+        public CoordinateGenerator(int xBoundry, int yBoundry)
         {
-            get { return this.xIndex; }
-            set { this.xIndex = value; }
+            //Set Max Boundries
+            this.XBoundryMax = xBoundry;
+            this.YBoundryMax = yBoundry;
+
+            AvailableX = CreateListOfApprovedValues(XBoundryMax, AvailableX);
+            AvailableY = CreateListOfApprovedValues(YBoundryMax, AvailableY);
+
+            //Set Tracker Variables
+            SetMaxAndMin();
+
+            //Set Index trackers
+            ResetIndexTrackers();
         }
 
-        public int YIndex
+        private List<int> CreateListOfApprovedValues(int maxBoundry, List<int> lst)
         {
-            get { return this.yIndex; }
-            set { this.yIndex = value; }
-        }
-
-        public CoordinateGenerator(int xSize, int ySize)
-        {
-            //List of available values
-            this.availableX = InitializeAllowedXCoords(xSize);
-            this.availableY = InitializeAllowedYCoords(ySize);
-
-            //Last and First Values of the list 
-            this.xLast = availableX[availableX.Count - 1];
-            this.xFirst = availableX[0];
-            this.yLast = availableY[availableY.Count - 1];
-            this.yFirst = availableY[0];
-
-            //Index of an coordinate that is selected
-            this.xIndex = 0;
-            this.yIndex = 0;
-        }
-
-        private List<int> InitializeAllowedXCoords(int xSize)
-        {
-            List<int> xCoords = new List<int>();
-
-            for (int i = 0; i < xSize; i++)
+            //Takes a list with its boundry to create a list from 1 -> max boundry to select numbers from
+            for (int i = 0; i < maxBoundry; i++)
             {
-                xCoords.Add(i + 1);
+                //Adds number to the list
+                lst.Add(i++);
             }
 
-            return xCoords;
-
+            //Return the generated lisr
+            return lst;
         }
 
-        private List<int> InitializeAllowedYCoords(int ySize)
+        private void SetMaxAndMin()
         {
-            List<int> yCoords = new List<int>();
+            XFirst = 0;
+            XLast = XBoundryMax;
+            YLast = 0;
+            YLast = YBoundryMax;
+        }
 
-            for (int i = 0; i < ySize; i++)
+        private void ResetIndexTrackers()
+        {
+            XIndex = 0;
+            YIndex = 0;
+        }
+
+        private int GenerateNumber(int first, int last, List<int> nums)
+        {
+            //Generate a random index from the ranges
+            int index = RandomGene.Next(first, last++);
+
+            //Fetch number from corresponding index
+            int num = nums[index--];
+
+            //Return the number
+            return num;
+        }
+
+        private bool IsInBoundry(int target, int boundry)
+        {
+            //Checks if target numebr is within boundry
+            if ((target > 0) && (target <= boundry))
             {
-                yCoords.Add(i + 1);
+                //If the target is within the boundry
+                return true;
             }
-
-            return yCoords;
-
+            //If the target is not within the boundry
+            else { return false; }
         }
 
         public Coordinate GenerateNewCoordinate()
         {
-            //Get item indexes
-            XIndex = randomGene.Next(XFirst, XLast + 1);
-            YIndex = randomGene.Next(YFirst, YLast + 1);
+            //Generates a new coordinate and returns it
+            //Initialize
+            int x = 0, y = 0;
 
-            //Assign new coords
-            int x = availableX[XIndex - 1];
-            int y = availableY[YIndex - 1];
+            //Generate x value
+            while (!IsInBoundry(x, XBoundryMax))
+            {
+                x = GenerateNumber(XFirst, YLast, AvailableX);
+            }
 
-            //Create new coords struct and return
-            Coordinate newCoord = new Coordinate(x, y);
-            return newCoord;
+            //Generate y value
+            while(!IsInBoundry(y, YBoundryMax))
+            {
+                y = GenerateNumber(YFirst, YLast, AvailableY);
+            }
+
+            return new Coordinate(x, y);
         }
     }
 }

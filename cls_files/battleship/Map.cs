@@ -8,7 +8,6 @@ namespace BattleShipCollection
     {
         private int xSize;
         private int ySize;
-        private string shotResult;
         private List<BattleShip> createdShips = new List<BattleShip>();
         private Dictionary<string, BattleShip> activeShips = new Dictionary<string, BattleShip>();
         private List<Coordinate> missedShots = new List<Coordinate>();
@@ -22,12 +21,6 @@ namespace BattleShipCollection
         public int YSize
         {
             get { return this.ySize; }
-        }
-
-        public string ShotResult
-        {
-            get { return this.shotResult; }
-            set { this.shotResult = value; }
         }
 
         public Dictionary<string, BattleShip> ActiveShips
@@ -70,18 +63,27 @@ namespace BattleShipCollection
 
         public void PlotShips()
         {
-            //Plot each ship that is created
-            foreach (BattleShip ShipWhoNeedsCoords in createdShips)
+            try
             {
-                Coordinate startPoint = DetermineStartPoint();
-                PlotRestOfTheShip(ShipWhoNeedsCoords, startPoint);
-                AddShipToActiveregister(ShipWhoNeedsCoords);
+                //Plot each ship that is created
+                foreach (BattleShip ShipWhoNeedsCoords in createdShips)
+                {
+                    Coordinate startPoint = DetermineStartPoint();
+                    PlotRestOfTheShip(ShipWhoNeedsCoords, startPoint);
+                    AddShipToActiveregister(ShipWhoNeedsCoords);
+                }
             }
+            catch (Exception e)
+            {
+
+            }
+            
 
         }//PlotShips()
 
         private Coordinate DetermineStartPoint()
         {
+            //Determines a startpoint avaialble for a newly generated ship
             //Initialize
             CoordinateGenerator coordinateGenerator = new CoordinateGenerator(XSize, YSize);
             Coordinate newStartPoint = default;
@@ -89,8 +91,11 @@ namespace BattleShipCollection
             int shipsWithNotCurrentCoordinate = 0, coordCount = 0;
 
             //Create a valid unused coordinate
-            try
+            while (!validStartPointFound)
             {
+
+            }
+            
                 while (!validStartPointFound)
                 {
                     //Create new Coordinates
@@ -144,11 +149,6 @@ namespace BattleShipCollection
 
                 }//while !validStartPoint
 
-            }//try
-            catch (Exception e)
-            {
-                MapEncounterdError("An error occurred while findign a startpoint", Convert.ToString(e));
-            }
 
 
             return newStartPoint;

@@ -10,7 +10,7 @@ class BattleMathConsoleVersion
         //Create an instance of the battle engine and its configuration object
         var battleEngine = new BattleEngine();
         var engineCfg = new EngineConfig(
-                            "2WAY",//Game Node
+                            "2WAY",//Game Mode
                             "Medium",//Game/Bot Difficulty
                             2,//Map max size in x
                             3);//Map max size in y
