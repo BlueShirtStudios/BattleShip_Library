@@ -212,7 +212,7 @@ namespace BattleShipCollection
 
         private void BuildActiveRegistry(GameModes mode, int x, int y)
         {
-            //Build our active regisrty, handling map creation and coordinate generator
+            //Build our active registry, handling map creation and coordinate generator
             //Checks which game was activated 
             if (mode == GameModes.ONEWAY)
             {

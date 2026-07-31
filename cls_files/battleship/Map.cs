@@ -6,10 +6,18 @@ namespace BattleShipCollection
 {
     public class Map
     {
+        //Map Specs
         private int xSize;
         private int ySize;
+
+        //Plot Machine
+        private PointPlotter Plotter = default;
+
+        //Ship Registry
         private List<BattleShip> createdShips = new List<BattleShip>();
-        private Dictionary<string, BattleShip> activeShips = new Dictionary<string, BattleShip>();
+        private List<BattleShip> activeShips = new List<BattleShip>();
+
+        //Shot Tracker
         private List<Coordinate> missedShots = new List<Coordinate>();
         private List<Coordinate> hitShots = new List<Coordinate>();
 
@@ -23,7 +31,7 @@ namespace BattleShipCollection
             get { return this.ySize; }
         }
 
-        public Dictionary<string, BattleShip> ActiveShips
+        public List<BattleShip> ActiveShips
         {
             get { return this.activeShips; }
             set { this.activeShips = value; }
@@ -49,6 +57,7 @@ namespace BattleShipCollection
         {
             this.xSize = cXSize;
             this.ySize = cYSize;
+            Plotter = new(XSize, YSize);
         }
 
         private void AddShipToActiveregister(BattleShip Ship)
@@ -68,8 +77,8 @@ namespace BattleShipCollection
                 //Plot each ship that is created
                 foreach (BattleShip ShipWhoNeedsCoords in createdShips)
                 {
-                    Coordinate startPoint = DetermineStartPoint();
-                    PlotRestOfTheShip(ShipWhoNeedsCoords, startPoint);
+                    Plotter.CreateShipCoordinateSet(ShipWhoNeedsCoords.Length);
+                    ShipWhoNeedsCoords.OccupiedCoordinates = Plotter.CoordinateSet;
                     AddShipToActiveregister(ShipWhoNeedsCoords);
                 }
             }
