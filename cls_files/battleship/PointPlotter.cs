@@ -4,13 +4,14 @@ namespace BattleShipCollection
 {
     public class PointPlotter
     {
-        private CoordinateGenerator coordGene = default;
-        public Coordinate startPoint = default;
-        public List<Coordinate> followingCoords = default;
+        private CoordinateGenerator coordGene = null;
 
-        public List<Coordinate> alreadyComputedCoords = default;
+    //    public List<Coordinate> alreadyComputedCoords = new();
 
-        private CoordinateGenerator CoordGene { get; }
+        private CoordinateGenerator CoordGene
+        {
+            get { return this.coordGene; }
+        }
         public Coordinate StartPoint { get; set; }
         public List<Coordinate> CoordinateSet { get; private set; }
         private List<Coordinate> AlreadyComputedCoords { get; }
@@ -18,9 +19,9 @@ namespace BattleShipCollection
         public PointPlotter(int xRange, int yRange)
         {
             this.coordGene = new(xRange, yRange);
-            this.startPoint = new Coordinate(0, 0);
-            this.followingCoords = new();
-            this.alreadyComputedCoords = new();
+            this.StartPoint = new Coordinate(0, 0);
+            this.CoordinateSet = new();
+            this.AlreadyComputedCoords = new();
         }
 
         public void CreateShipCoordinateSet(int shipSize)
@@ -80,9 +81,9 @@ namespace BattleShipCollection
             return false;
         }
 
-        private Directions DetermineOpenDirection(Coordinate startPoint, int coordinateCount)
+        private Directions DetermineOpenDirection(Coordinate startPoint, int shipSize)
         {
-            List<Directions> openDirection = GetOpenDirections(startPoint, coordinateCount);
+            List<Directions> openDirection = GetOpenDirections(startPoint, shipSize - 1); //shipSize - 1 = Distance from already found startpoint to supposed end
             return ChooseDirection(openDirection);
         }
 
@@ -139,35 +140,60 @@ namespace BattleShipCollection
 
         private bool IsThisDirectionOpen(Directions dir, Coordinate coord, int dis)
         {
-            //Build new coordinate combined with differnence ot check if that coordinate is open
+            //Build new coordinate combined with differnence and check if that coordinate is open
             Coordinate checker = GetCoordinateFromDirection(dir, coord, dis);
 
-            //Does it exist?
+            //Is the coordinate within boundries
+            if (!IsWithinBoundries(checker))
+            {
+                return false;
+            }
+
+            //Does it already exist within computed coordinates?
             if (DoesThisPairExist(checker))
             {
-                return true;
+                //If the coordinate exists, the direction is taken
+                return false;
             }
-            else { return false; }
+
+            //If is does not exist, the direction is open
+            else { return true; }
+        }
+
+        private bool IsWithinBoundries(Coordinate coord)
+        {
+            bool checker = false;
+            //Checks if the coordinate values are not 0
+            if ((coord.X > 0) && (coord.Y > 0))
+            {
+                //Check is the value of the coordinate falls within the range
+                if ((coord.X <= CoordGene.XBoundryMax) && (coord.Y <= CoordGene.YBoundryMax))
+                {
+                    checker = true;
+                }
+                
+            }
+            return checker;
         }
 
         private int UpdateXLeft(int x, int distance)
         {
-            return x - (distance--);
+            return x - (distance);
         }
 
         private int UpdateYUp(int y, int distance)
         {
-            return y + (distance--);
+            return y + (distance);
         }
 
         private int UpdateXRight(int x, int distance)
         {
-            return x + (distance--);
+            return x + (distance);
         } 
 
         private int UpdateYDown(int y, int distance)
         {
-            return y - (distance--);
+            return y - (distance);
         }
 
         private Directions ChooseDirection(List<Directions> availableDir)
@@ -183,12 +209,12 @@ namespace BattleShipCollection
             List<Coordinate> finalSet = new();
 
             //Get the end coordinate
-            Coordinate EndCoordinate = GetCoordinateFromDirection(dir, startCoordinate, distance);
+            Coordinate EndCoordinate = GetCoordinateFromDirection(dir, startCoordinate, distance - 1);
 
             //Build the set accroding to the direction
             if (dir == Directions.LEFT)
             {
-                finalSet = CreateLeftSet(startCoordinate.X, EndCoordinate.X, startCoordinate.Y);
+                finalSet = CreateLeftSet(EndCoordinate.X, startCoordinate.X, startCoordinate.Y);
             }
             else if (dir == Directions.RIGHT)
             {
@@ -200,7 +226,7 @@ namespace BattleShipCollection
             }
             else if (dir == Directions.DOWN)
             {
-                finalSet = CreateDownSet(startCoordinate.Y, EndCoordinate.Y, startCoordinate.X);
+                finalSet = CreateDownSet(EndCoordinate.Y, startCoordinate.Y, startCoordinate.X);
             }
 
             //Return the new set
@@ -214,9 +240,9 @@ namespace BattleShipCollection
             Coordinate coord = new(0, constant);
 
             //Loop and build set
-            for (int i = min; i < max + 1; i++)
+            for (int i = min; i <= max; i++)
             {
-                coord.X = i++;
+                coord.X = i + 1;
                 posNumbers.Add(coord);
             }
 
@@ -230,9 +256,9 @@ namespace BattleShipCollection
             Coordinate coord = new(constant, 0);
 
             //Loop and build set
-            for (int i = min; i < max + 1; i++)
+            for (int i = min; i <= max; i++)
             {
-                coord.Y = i++;
+                coord.Y = i + 1;
                 posNumbers.Add(coord);
             }
 
@@ -246,9 +272,9 @@ namespace BattleShipCollection
             Coordinate coord = new(0, constant);
 
             //Loop and build set
-            for (int i = max; i > min + 1; i--)
+            for (int i = max; i >= min; i--)
             {
-                coord.X = i--;
+                coord.X = i - 1;
                 posNumbers.Add(coord);
             }
 
@@ -262,9 +288,9 @@ namespace BattleShipCollection
             Coordinate coord = new(constant, 0);
 
             //Loop and build set
-            for (int i = max; i > min + 1; i--)
+            for (int i = max; i >= min; i--)
             {
-                coord.Y = i--;
+                coord.Y = i - 1;
                 posNumbers.Add(coord);
             }
 
@@ -273,7 +299,8 @@ namespace BattleShipCollection
 
         public void ResetPlotter()
         {
-
+            StartPoint = new Coordinate(0, 0);
+            CoordinateSet.Clear();
         }
 
     }

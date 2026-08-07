@@ -14,7 +14,7 @@ namespace BattleShipCollection
         public int XIndex { get; set; }
         public int YIndex { get; set; }
         public int XBoundryMax { get; set; }
-        private int YBoundryMax { get; set; }
+        public int YBoundryMax { get; set; }
 
         private List<int> AvailableX
         {
@@ -34,8 +34,8 @@ namespace BattleShipCollection
         public CoordinateGenerator(int xBoundry, int yBoundry)
         {
             //Set Max Boundries
-            this.XBoundryMax = xBoundry;
-            this.YBoundryMax = yBoundry;
+            XBoundryMax = xBoundry;
+            YBoundryMax = yBoundry;
 
             AvailableX = CreateListOfApprovedValues(XBoundryMax, AvailableX);
             AvailableY = CreateListOfApprovedValues(YBoundryMax, AvailableY);
@@ -53,7 +53,7 @@ namespace BattleShipCollection
             for (int i = 0; i < maxBoundry; i++)
             {
                 //Adds number to the list
-                lst.Add(i++);
+                lst.Add(i + 1);
             }
 
             //Return the generated lisr
@@ -88,7 +88,7 @@ namespace BattleShipCollection
 
         private bool IsInBoundry(int target, int boundry)
         {
-            //Checks if target numebr is within boundry
+            //Checks if target numeber is within boundry
             if ((target > 0) && (target <= boundry))
             {
                 //If the target is within the boundry

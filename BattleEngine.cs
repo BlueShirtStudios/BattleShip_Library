@@ -445,7 +445,7 @@ namespace BattleShipCollection
                 //If the fired ship is sinking
                 if (CheckIfShipSunk(shipThatWasHit, firedMap))
                 {
-                    firedMap.ActiveShips.Remove(shipThatWasHit.GenerateShipKey(), out shipThatWasHit);
+                    firedMap.ActiveShips.Remove(shipThatWasHit);
                     targetedCoordOutcome = ShotOutcome.SUNK;
                 }
             }

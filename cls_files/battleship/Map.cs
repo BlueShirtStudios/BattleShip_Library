@@ -55,14 +55,14 @@ namespace BattleShipCollection
 
         public Map(int cXSize, int cYSize)
         {
-            this.xSize = cXSize;
-            this.ySize = cYSize;
-            Plotter = new(XSize, YSize);
+            //this.xSize = cXSize;
+           // this.ySize = cYSize;
+            Plotter = new(cXSize, cYSize);
         }
 
         private void AddShipToActiveregister(BattleShip Ship)
         {
-            activeShips[Ship.GenerateShipKey()] = Ship;
+            activeShips.Add(Ship);
         }
 
         public void AddShip(BattleShip Ship)
@@ -77,9 +77,17 @@ namespace BattleShipCollection
                 //Plot each ship that is created
                 foreach (BattleShip ShipWhoNeedsCoords in createdShips)
                 {
+                    //Create the ship's coordinate's set
                     Plotter.CreateShipCoordinateSet(ShipWhoNeedsCoords.Length);
+
+                    //Assign the set to the ship
                     ShipWhoNeedsCoords.OccupiedCoordinates = Plotter.CoordinateSet;
+
+                    //Add ship to active register
                     AddShipToActiveregister(ShipWhoNeedsCoords);
+
+                    //Clean our plotter for the next ship
+                    Plotter.ResetPlotter();
                 }
             }
             catch (Exception e)
@@ -89,290 +97,6 @@ namespace BattleShipCollection
             
 
         }//PlotShips()
-
-        private Coordinate DetermineStartPoint()
-        {
-            //Determines a startpoint avaialble for a newly generated ship
-            //Initialize
-            CoordinateGenerator coordinateGenerator = new CoordinateGenerator(XSize, YSize);
-            Coordinate newStartPoint = default;
-            bool validStartPointFound = false, coordinateFound = false;
-            int shipsWithNotCurrentCoordinate = 0, coordCount = 0;
-
-            //Create a valid unused coordinate
-            while (!validStartPointFound)
-            {
-
-            }
-            
-                while (!validStartPointFound)
-                {
-                    //Create new Coordinates
-                    newStartPoint = coordinateGenerator.GenerateNewCoordinate();
-
-                    //If there is no active ships
-                    if (activeShips.Count == 0)
-                    {
-                        validStartPointFound = true;
-                    }
-                    foreach (KeyValuePair<string, BattleShip> activeShip in ActiveShips)
-                    {
-                        coordCount = 0;
-                        foreach (Coordinate activeCoordinates in activeShip.Value.OccupiedCoordinates)
-                        {
-                            //Checks if a coordinate is occupied
-                            if ((activeCoordinates.X == newStartPoint.X) && (activeCoordinates.Y == newStartPoint.Y))
-                            {
-                                //If it is occupied
-                                //Update Coordinate Generator
-                                coordinateGenerator.availableX.Remove(newStartPoint.X);
-                                coordinateGenerator.availableY.Remove(newStartPoint.Y);
-                                coordinateGenerator.XLast = coordinateGenerator.XLast--;
-                                coordinateGenerator.YLast = coordinateGenerator.YLast--;
-
-                                //Exit both loops
-                                coordinateFound = true;
-                                break;
-                            }
-                            else
-                            {
-                                coordCount++;
-                                if (coordCount == activeShip.Value.OccupiedCoordinates.Count)
-                                {
-                                    shipsWithNotCurrentCoordinate++;
-                                }
-                            }
-
-                        }//foreach occupied coordinate
-
-                        //Exit the outerloop
-                        if (coordinateFound) { break; }
-
-                    }//foreach ship
-
-                    //Check if the coordinate is valid
-                    if (shipsWithNotCurrentCoordinate == activeShips.Count)
-                    {
-                        validStartPointFound = true;
-                    }
-
-                }//while !validStartPoint
-
-
-
-            return newStartPoint;
-
-        }
-
-        private void PlotRestOfTheShip(BattleShip ShipWhoNeedsCoords, Coordinate startingCoordinates)
-        {
-            //Initialize
-            List<Directions> openDirections = new List<Directions>();
-
-            //Check if there is space open to plot points
-            try
-            {
-                //Left
-                Coordinate shipMaxLengthFromStart = new Coordinate(startingCoordinates.X - (ShipWhoNeedsCoords.Length - 1), startingCoordinates.Y);
-                if (!DoesCoordinatePairExist(shipMaxLengthFromStart))
-                {
-                    openDirections.Add(Directions.LEFT);
-                }
-
-                //Right
-                shipMaxLengthFromStart.X = startingCoordinates.X + (ShipWhoNeedsCoords.Length - 1);
-                if (!DoesCoordinatePairExist(shipMaxLengthFromStart))
-                {
-                    openDirections.Add(Directions.RIGHT);
-                }
-
-                //Up
-                shipMaxLengthFromStart.X = startingCoordinates.X;
-                shipMaxLengthFromStart.Y = startingCoordinates.Y + (ShipWhoNeedsCoords.Length - 1);
-                if (!DoesCoordinatePairExist(shipMaxLengthFromStart))
-                {
-                    openDirections.Add(Directions.UP);
-                }
-
-                //Down
-                shipMaxLengthFromStart.Y = startingCoordinates.Y - (ShipWhoNeedsCoords.Length - 1);
-                if (!DoesCoordinatePairExist(shipMaxLengthFromStart))
-                {
-                    openDirections.Add(Directions.DOWN);
-                }
-
-                //Choose at random a direction from the available list
-                Random indexGene = new Random();
-                int index = 0;
-                index = indexGene.Next(0, openDirections.Count - 1);
-
-                //Plot rest of the boat from the selected direction
-                Directions finalDirection = openDirections[index];
-                Coordinate shipNewCoords = default;
-                ShipWhoNeedsCoords.OccupiedCoordinates.Add(startingCoordinates);
-                if (finalDirection == Directions.LEFT)
-                {
-                    for (int i = startingCoordinates.X - 1; i > startingCoordinates.X - ShipWhoNeedsCoords.Length; i--)
-                    {
-                        shipNewCoords.X = i;
-                        if (shipNewCoords.Y != startingCoordinates.Y)
-                        {
-                            shipNewCoords.Y = startingCoordinates.Y;
-                        }
-
-                        ShipWhoNeedsCoords.OccupiedCoordinates.Add(shipNewCoords);
-                    }
-                }
-
-                if (finalDirection == Directions.RIGHT)
-                {
-                    for (int i = startingCoordinates.X + 1; i < startingCoordinates.X + ShipWhoNeedsCoords.Length; i++)
-                    {
-                        shipNewCoords.X = i;
-                        if (shipNewCoords.Y != startingCoordinates.Y)
-                        {
-                            shipNewCoords.Y = startingCoordinates.Y;
-                        }
-
-                        ShipWhoNeedsCoords.OccupiedCoordinates.Add(shipNewCoords);
-                    }
-                }
-
-                if (finalDirection == Directions.UP)
-                {
-                    for (int i = startingCoordinates.Y + 1; i < startingCoordinates.Y + ShipWhoNeedsCoords.Length; i++)
-                    {
-                        if (shipNewCoords.X != startingCoordinates.X)
-                        {
-                            shipNewCoords.X = startingCoordinates.X;
-                        }
-                        shipNewCoords.Y = i;
-                        ShipWhoNeedsCoords.OccupiedCoordinates.Add(shipNewCoords);
-                    }
-                }
-
-                if (finalDirection == Directions.DOWN)
-                {
-                    for (int i = startingCoordinates.Y - 1; i > startingCoordinates.Y - ShipWhoNeedsCoords.Length; i--)
-                    {
-                        if (shipNewCoords.X != startingCoordinates.X)
-                        {
-                            shipNewCoords.X = startingCoordinates.X;
-                        }
-                        shipNewCoords.Y = i;
-                        ShipWhoNeedsCoords.OccupiedCoordinates.Add(shipNewCoords);
-                    }
-                }
-            }//try
-            catch (Exception e)
-            {
-                MapEncounterdError("An error occured while plotting rest of ship", Convert.ToString(e));
-            }
-
-
-        }
-
-        public bool DoesCoordinatePairExist(Coordinate givenCoordinates)
-        {
-            bool coordinateFound = false;
-            int coordCount = 0, shipsWithNoCurrentCoordinate = 0;
-
-            //Check if falls within map boundries
-            if ((givenCoordinates.X < 0) || (givenCoordinates.X > xSize) || (givenCoordinates.Y < 0) || (givenCoordinates.Y > ySize))
-            {
-                return true;
-            }
-
-            //Check if is the first boat being addedd
-            if (IsActiveRegistryEmpty())
-            {
-                return false;
-            }
-
-            //Check if pair exists in active registry
-            foreach (KeyValuePair<string, BattleShip> activeShip in ActiveShips)
-            {
-                foreach (Coordinate activeCoordinates in activeShip.Value.OccupiedCoordinates)
-                {
-                    //Checks if a coordinate is occupied
-                    if ((activeCoordinates.X == givenCoordinates.X) && (activeCoordinates.Y == givenCoordinates.Y))
-                    {
-
-                        //Exit both loops
-                        coordinateFound = true;
-                        break;
-                    }
-                    else
-                    {
-                        coordCount++;
-                        if (coordCount == activeShip.Value.OccupiedCoordinates.Count)
-                        {
-                            shipsWithNoCurrentCoordinate++;
-                        }
-                    }
-
-                }//foreach occupied coordinate
-
-                //Exit the outerloop
-                if (coordinateFound) { break; }
-            }
-
-            if (shipsWithNoCurrentCoordinate != activeShips.Count)
-            {
-                coordinateFound = false;
-            }
-
-            return coordinateFound;
-        }
-
-        public BattleShip DoesShipHaveCoordinate(Coordinate givenCoordinates)
-        {
-            bool coordinateFound = false;
-            BattleShip foundShip = default;
-            int coordCount = 0, shipsWithNoCurrentCoordinate = 0;
-
-            //Check if falls within map boundries
-            if ((givenCoordinates.X < 0) || (givenCoordinates.X > xSize) || (givenCoordinates.Y < 0) || (givenCoordinates.Y > ySize))
-            {
-                return null;
-            }
-
-            //Check if pair exists in active registry
-            foreach (KeyValuePair<string, BattleShip> activeShip in ActiveShips)
-            {
-                foreach (Coordinate activeCoordinates in activeShip.Value.OccupiedCoordinates)
-                {
-                    //Checks if a coordinate is occupied
-                    if ((activeCoordinates.X == givenCoordinates.X) && (activeCoordinates.Y == givenCoordinates.Y))
-                    {
-
-                        //Exit both loops
-                        coordinateFound = true;
-                        foundShip = activeShip.Value;
-                        break;
-                    }
-
-                }//foreach occupied coordinate
-
-                //Exit the outerloop
-                if (coordinateFound) { break; }
-            }
-
-            return foundShip;
-        }
-
-        private void MapEncounterdError(string msg, string strError = "")
-        {
-            if (String.IsNullOrEmpty(strError))
-            {
-                Console.WriteLine(msg);
-            }
-            else
-            {
-                Console.WriteLine($"{msg}: {strError}");
-            }
-
-        }
 
         private bool IsActiveRegistryEmpty()
         {
@@ -384,6 +108,39 @@ namespace BattleShipCollection
             {
                 return false;
             }
+        }
+
+        public BattleShip DoesShipHaveCoordinate(Coordinate requetedCoord)
+        {
+            //Go through all the ships in the register
+            foreach (BattleShip ship in activeShips)
+            {
+                //Checks if a ship occupies the coordinate
+                if (!ScanCoordinateSet(requetedCoord, ship.OccupiedCoordinates))
+                {
+                    //If it does not find a match
+                    continue;
+                }
+
+                //If a match is found
+                return ship;
+            }
+
+            //If no matches were found returns null
+            return null;
+        }
+
+        private bool ScanCoordinateSet(Coordinate target, List<Coordinate> coordinateSet)
+        {
+            foreach(Coordinate c in coordinateSet)
+            {
+                if ((target.X == c.X) && (target.Y == c.Y))
+                {
+                    return true;
+                }
+            }
+
+            return false;
         }
 
         public enum Directions

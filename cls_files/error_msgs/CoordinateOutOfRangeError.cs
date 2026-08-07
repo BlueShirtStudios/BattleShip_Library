@@ -2,6 +2,6 @@
 {
     public class CoordinateOutOfRangeError : Exception
     {
-        public CoordinateOutOfRangeError(string msg) : base(msg) { };
+        public CoordinateOutOfRangeError(string msg) : base(msg) { }
     }
 }
