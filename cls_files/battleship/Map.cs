@@ -14,7 +14,6 @@ namespace BattleShipCollection
         private PointPlotter Plotter = default;
 
         //Ship Registry
-        private List<BattleShip> createdShips = new List<BattleShip>();
         private List<BattleShip> activeShips = new List<BattleShip>();
 
         //Shot Tracker
@@ -37,12 +36,6 @@ namespace BattleShipCollection
             set { this.activeShips = value; }
         }
 
-        public List<BattleShip> CreatedShips
-        {
-            get { return this.createdShips; }
-            set { this.createdShips = value; }
-        }
-
         public List<Coordinate> MissedShots
         {
             get { return this.missedShots; }
@@ -55,8 +48,8 @@ namespace BattleShipCollection
 
         public Map(int cXSize, int cYSize)
         {
-            //this.xSize = cXSize;
-           // this.ySize = cYSize;
+            this.xSize = cXSize;
+            this.ySize = cYSize;
             Plotter = new(cXSize, cYSize);
         }
 
@@ -65,23 +58,18 @@ namespace BattleShipCollection
             activeShips.Add(Ship);
         }
 
-        public void AddShip(BattleShip Ship)
-        {
-            createdShips.Add(Ship);
-        }
-
-        public void PlotShips()
+        public void PlotShips(List<BattleShip> shipList)
         {
             try
             {
                 //Plot each ship that is created
-                foreach (BattleShip ShipWhoNeedsCoords in createdShips)
+                foreach (BattleShip ShipWhoNeedsCoords in shipList)
                 {
                     //Create the ship's coordinate's set
                     Plotter.CreateShipCoordinateSet(ShipWhoNeedsCoords.Length);
 
                     //Assign the set to the ship
-                    ShipWhoNeedsCoords.OccupiedCoordinates = Plotter.CoordinateSet;
+                    ShipWhoNeedsCoords.OccupiedCoordinates = new List<Coordinate>(Plotter.CoordinateSet);
 
                     //Add ship to active register
                     AddShipToActiveregister(ShipWhoNeedsCoords);
@@ -92,7 +80,7 @@ namespace BattleShipCollection
             }
             catch (Exception e)
             {
-
+                throw;
             }
             
 
@@ -136,10 +124,12 @@ namespace BattleShipCollection
             {
                 if ((target.X == c.X) && (target.Y == c.Y))
                 {
+                    //If the pair exists
                     return true;
                 }
             }
 
+            //If not
             return false;
         }
 

@@ -167,17 +167,6 @@ namespace BattleShipCollection
             }
 
         }
-        private void AddShipsToMap(List<BattleShip> shipList)
-        {
-            foreach (KeyValuePair<BasePlayer, Map> register in ActivePlayRegistry)
-            {
-                Map currentMap = register.Value;
-                foreach(BattleShip ship in shipList)
-                {
-                    currentMap.AddShip(ship);
-                }
-            }
-        }
 
         private bool CanWeInitializeGame()
         {
@@ -197,11 +186,8 @@ namespace BattleShipCollection
                 BotMode = cfg.Difficulty;
                 BuildActiveRegistry(GameMode, cfg.xSize, cfg.ySize);
 
-                //Add the requested ships to the map
-                AddShipsToMap(cfg.RequesteShips);
-
                 //Plots the ships on the map
-                PlotShipsOnAllMaps();
+                PlotShipsOnAllMaps(cfg.RequesteShips);
             }
             catch
             {
@@ -237,15 +223,21 @@ namespace BattleShipCollection
             return new BotPlayer(diff, profile, coordGene);
         }
 
-        private void PlotShipsOnAllMaps()
+        private void PlotShipsOnAllMaps(List<BattleShip> shipList)
         {
             foreach(KeyValuePair<BasePlayer, Map> register in ActivePlayRegistry)
             {
                 //Checks if a key has a map object, else it will not plot
-                if (register.Value != null)
+                BasePlayer currentPlayer = register.Key;
+                Map map = register.Value;
+
+                if (map != null)
                 {
-                    register.Value.PlotShips();
+                    map.PlotShips(shipList);
+                    ActivePlayRegistry[currentPlayer] = map;
                 }
+
+                
             }
             
         }

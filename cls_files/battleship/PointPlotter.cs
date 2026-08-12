@@ -1,4 +1,5 @@
 ﻿using BattleExceptions;
+using System.Reflection.Metadata;
 
 namespace BattleShipCollection
 {
@@ -106,36 +107,14 @@ namespace BattleShipCollection
 
         private Coordinate GetCoordinateFromDirection(Directions dir, Coordinate coord, int dis)
         {
-            //Update tthe coordinate based on the direction that is passed
-            switch (dir)
+            return dir switch
             {
-                case Directions.LEFT:
-                    {
-                        coord.X = UpdateXLeft(coord.X, dis);
-                        break;
-                    }
-
-                case Directions.RIGHT:
-                    {
-                        coord.X = UpdateXRight(coord.X, dis);
-                        break;
-                    }
-
-                case Directions.UP:
-                    {
-                        coord.Y = UpdateYUp(coord.Y, dis);
-                        break;
-                    }
-
-                case Directions.DOWN:
-                    {
-                        coord.Y = UpdateYDown(coord.Y, dis);
-                        break;
-                    }
-            }
-
-            //Return the coordinate after it changed
-            return coord;
+                Directions.LEFT => new Coordinate(coord.X - dis, coord.Y),
+                Directions.RIGHT => new Coordinate(coord.X + dis, coord.Y),
+                Directions.UP => new Coordinate(coord.X, coord.Y + dis),
+                Directions.DOWN => new Coordinate(coord.X, coord.Y - dis),
+                _ => coord
+            };
         }
 
         private bool IsThisDirectionOpen(Directions dir, Coordinate coord, int dis)
@@ -203,99 +182,79 @@ namespace BattleShipCollection
             return availableDir[index];
         }
 
-        private List<Coordinate> CreateCoordinateSet(Directions dir, Coordinate startCoordinate, int distance)
-        {
-            //Initialize
-            List<Coordinate> finalSet = new();
+       
 
-            //Get the end coordinate
-            Coordinate EndCoordinate = GetCoordinateFromDirection(dir, startCoordinate, distance - 1);
-
-            //Build the set accroding to the direction
-            if (dir == Directions.LEFT)
-            {
-                finalSet = CreateLeftSet(EndCoordinate.X, startCoordinate.X, startCoordinate.Y);
-            }
-            else if (dir == Directions.RIGHT)
-            {
-                finalSet = CreateRightSet(startCoordinate.X, EndCoordinate.X, startCoordinate.Y);
-            }
-            else if (dir == Directions.UP)
-            {
-                finalSet = CreateUpSet(startCoordinate.Y, EndCoordinate.Y, startCoordinate.X);
-            }
-            else if (dir == Directions.DOWN)
-            {
-                finalSet = CreateDownSet(EndCoordinate.Y, startCoordinate.Y, startCoordinate.X);
-            }
-
-            //Return the new set
-            return finalSet;
-        }
-
-        private List<Coordinate> CreateRightSet(int min, int max, int constant)
+        private List<Coordinate> CreateRightSet(int min, int max, int constant) //Start, End, Coordinate that stays constant
         {
             //Initialize
             List<Coordinate> posNumbers = new();
-            Coordinate coord = new(0, constant);
 
             //Loop and build set
             for (int i = min; i <= max; i++)
             {
-                coord.X = i + 1;
-                posNumbers.Add(coord);
+                posNumbers.Add(new Coordinate(i, constant));
             }
 
             return posNumbers;
         }
 
-        private List<Coordinate> CreateUpSet(int min, int max, int constant)
+        private List<Coordinate> CreateUpSet(int min, int max, int constant)  //Start, End, Coordinate that stays constant
         {
             //Initialize
             List<Coordinate> posNumbers = new();
-            Coordinate coord = new(constant, 0);
 
             //Loop and build set
             for (int i = min; i <= max; i++)
             {
-                coord.Y = i + 1;
-                posNumbers.Add(coord);
+                posNumbers.Add(new(constant, 0));
             }
 
             return posNumbers;
         }
 
-        private List<Coordinate> CreateLeftSet(int min, int max, int constant)
+        private List<Coordinate> CreateLeftSet(int min, int max, int constant)  //Start, End, Coordinate that stays constant
         {
             //Initialize
             List<Coordinate> posNumbers = new();
-            Coordinate coord = new(0, constant);
 
             //Loop and build set
             for (int i = max; i >= min; i--)
             {
-                coord.X = i - 1;
-                posNumbers.Add(coord);
+                posNumbers.Add(new(0, constant));
             }
 
             return posNumbers;
         }
 
-        private List<Coordinate> CreateDownSet(int min, int max, int constant)
+        private List<Coordinate> CreateDownSet(int min, int max, int constant)  //Start, End, Coordinate that stays constant
         {
             //Initialize
             List<Coordinate> posNumbers = new();
-            Coordinate coord = new(constant, 0);
 
             //Loop and build set
             for (int i = max; i >= min; i--)
-            {
-                coord.Y = i - 1;
-                posNumbers.Add(coord);
+            { 
+                posNumbers.Add(new(constant, 0));
             }
 
             return posNumbers;
         }
+
+        private List<Coordinate> CreateCoordinateSet(Directions dir, Coordinate startPoint, int shipSize)
+        {
+            List<Coordinate> posNumbers = new();
+
+            //Loop and build set
+            for (int i = 0; i < shipSize; i++)
+            {
+                Coordinate nextCoordinate = GetCoordinateFromDirection(dir, startPoint, i);
+                posNumbers.Add(nextCoordinate);
+                AlreadyComputedCoords.Add(nextCoordinate);
+            }
+
+            return posNumbers;
+        }
+
 
         public void ResetPlotter()
         {

@@ -61,9 +61,9 @@ class BattleMathConsoleVersion
         battleEngine.AttemptShot(1, 2);
         battleEngine.AttemptShot(1, 3);
         battleEngine.AttemptShot(2, 1);
-        battleEngine.AttemptShot(2, 2); 
+        battleEngine.AttemptShot(2, 2);
         battleEngine.AttemptShot(2, 3);
-        
+
     }
 
     private static void OnGameEnd(object? sender, EventArgs e)

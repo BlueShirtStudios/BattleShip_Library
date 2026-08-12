@@ -50,10 +50,10 @@ namespace BattleShipCollection
         private List<int> CreateListOfApprovedValues(int maxBoundry, List<int> lst)
         {
             //Takes a list with its boundry to create a list from 1 -> max boundry to select numbers from
-            for (int i = 0; i < maxBoundry; i++)
+            for (int i = 1; i <= maxBoundry; i++)
             {
                 //Adds number to the list
-                lst.Add(i + 1);
+                lst.Add(i);
             }
 
             //Return the generated lisr
@@ -64,7 +64,7 @@ namespace BattleShipCollection
         {
             XFirst = 0;
             XLast = XBoundryMax;
-            YLast = 0;
+            YFirst = 0;
             YLast = YBoundryMax;
         }
 
@@ -74,13 +74,13 @@ namespace BattleShipCollection
             YIndex = 0;
         }
 
-        private int GenerateNumber(int first, int last, List<int> nums)
+        private int GenerateNumber(List<int> nums)
         {
             //Generate a random index from the ranges
-            int index = RandomGene.Next(first, last++);
+            int index = RandomGene.Next(0, nums.Count);
 
             //Fetch number from corresponding index
-            int num = nums[index--];
+            int num = nums[index];
 
             //Return the number
             return num;
@@ -107,14 +107,17 @@ namespace BattleShipCollection
             //Generate x value
             while (!IsInBoundry(x, XBoundryMax))
             {
-                x = GenerateNumber(XFirst, YLast, AvailableX);
+                x = GenerateNumber(AvailableX);
             }
 
             //Generate y value
             while(!IsInBoundry(y, YBoundryMax))
             {
-                y = GenerateNumber(YFirst, YLast, AvailableY);
+                y = GenerateNumber(AvailableY);
             }
+
+            //Remove the posiblity of generating that coordinate again 
+            //RemoveCombinationFromSets(x, y);
 
             return new Coordinate(x, y);
         }
