@@ -10,19 +10,6 @@ Whether you want to build a mini-game inside a larger project, create an educati
 
 ---
 
-## Table of Contents
-
-- [Architectural View](#-architectural-view)
-- [Current Features](#-current-features)
-- [Roadmap & Upcoming Features](#-roadmap--upcoming-features)
-- [Requirements](#-requirements)
-- [Installation](#-installation)
-- [How to Use](#-how-to-use)
-- [Contributing](#-contributing)
-- [License](#-license)
-
----
-
 ## 🏗️ Architectural View
 
 * **The Battle Engine** — The central entry point of the library. It orchestrates all internal components and exposes a clean, simplified API for managing game loops and grid logic.
@@ -97,28 +84,6 @@ class Program
 
         // Pass the configuration to the engine
         battleEngine.InitializeGame(engineCfg);
-
-        // Subscribe to game events
-        battleEngine.ShotAttempt += (sender, e) =>
-            Console.WriteLine($"Shot ({e.X}, {e.Y}) Outcome: {e.Result}");
-
-        battleEngine.ShipSunk += (sender, e) =>
-            Console.WriteLine($"{e.ShipName} was sunk in {e.ShotMadeBeforeSunk} shots (Score: {e.Score})");
-
-        battleEngine.GameWon += (sender, e) =>
-            Console.WriteLine($"{e.Entity} won! Shots: {e.TotalShots}, Score: {e.TotalScore}");
-
-        battleEngine.GameLoose += (sender, e) =>
-            Console.WriteLine($"{e.Entity} lost. Shots: {e.TotalShots}, Score: {e.TotalScore}");
-
-        battleEngine.ErrorOccurred += (sender, e) =>
-            Console.WriteLine($"{e.Msg}: {e.Error}");
-
-        battleEngine.GameEnd += (sender, e) =>
-        {
-            Console.WriteLine("The game has ended!");
-            Environment.Exit(0);
-        };
 
         // Fire shots at coordinates
         battleEngine.AttemptShot(1, 1);
