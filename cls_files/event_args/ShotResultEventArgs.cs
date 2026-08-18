@@ -5,6 +5,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using BattleEnumCollection;
+using BattlePlayers;
 
 namespace BattleEventArgs
 {
@@ -14,11 +15,14 @@ namespace BattleEventArgs
         public int Y { get; }
         public ShotOutcome Result { get; }
 
-        public ShotResultEventArgs(ShotOutcome cResult, int cX, int cY)
+        public BasePlayer Shooter{ get; }
+
+        public ShotResultEventArgs(ShotOutcome cResult, int cX, int cY, BasePlayer cPlayer)
         {
             this.X = cX;
             this.Y = cY;
             this.Result = cResult;
+            this.Shooter = cPlayer;
         }
     }
 }

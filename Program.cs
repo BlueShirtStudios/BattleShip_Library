@@ -24,7 +24,7 @@ class BattleMathConsoleVersion
         //Subscribe to the events
         battleEngine.ShotAttempt += (sender, e) =>
         {
-            Console.WriteLine($"Shot ({e.X}, {e.Y}) Outcome: {e.Result}");
+            Console.WriteLine($"{e.Shooter.Profile.displayName} Shot ({e.X}, {e.Y}) Outcome: {e.Result}");
             Console.WriteLine("");
         };
 

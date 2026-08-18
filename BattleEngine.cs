@@ -11,6 +11,7 @@ using BattleEventArgs;
 using BattlePlayers;
 using BattleExceptions;
 using BattleEnumCollection;
+using BattleScoreComponents;
 using System.Formats.Asn1;
 
 namespace BattleShipCollection
@@ -22,6 +23,7 @@ namespace BattleShipCollection
         private BotModes botMode;
         private Dictionary<BasePlayer, Map> activePlayRegistry = new();
         private ProfileManagerComponents.ProfileManager profileManager = new();
+        private Dictionary<BasePlayer, ScoreManager> globalSessionScore = new();
 
         //Public Events
         public event EventHandler<BattleEventArgs.GameWonEventArgs>? GameWon;
@@ -52,6 +54,11 @@ namespace BattleShipCollection
         public ProfileManagerComponents.ProfileManager ProfileManager
         {
             get { return this.profileManager; }
+        }
+
+        public Dictionary<BasePlayer, ScoreManager> GlobalSessionScore
+        {
+            get { return this.globalSessionScore; }
         }
 
         public void SelectGameMode(string strMode)
@@ -179,6 +186,9 @@ namespace BattleShipCollection
 
                 //Plots the ships on the map
                 PlotShipsOnAllMaps(cfg.RequesteShips);
+
+                //Build the score manager dictionary
+                BuildScoreManager(10);
             }
             catch
             {
@@ -225,7 +235,7 @@ namespace BattleShipCollection
                 if (map != null)
                 {
                     var ships = shipList.Select(s => s.Clone()).ToList();
-                    map.PlotShips(shipList);
+                    map.PlotShips(ships);
                     ActivePlayRegistry[currentPlayer] = map;
                 }
 
@@ -233,6 +243,14 @@ namespace BattleShipCollection
             
         }
 
+        private void BuildScoreManager(int defaultScore)
+        {
+            //Create a manager for each active player
+            foreach (KeyValuePair<BasePlayer, Map> entry in ActivePlayRegistry)
+            {
+                globalSessionScore.Add(entry.Key, new ScoreManager(this, defaultScore, entry.Key));
+            }
+        }
         public void AttemptShot(int x, int y)
         {
             try
@@ -275,6 +293,9 @@ namespace BattleShipCollection
             //Fires a shot on the active map
             ShotOutcome outcome = Fireshot(targetedCoordinate, targetMap);
 
+            //Raise Shot Attempt Event
+            RaiseShotResultEvent(outcome, targetedCoordinate.X, targetedCoordinate.Y, activePlayer);
+
             //Updates bot's result if player is bot
             UpdateBotShotResult(activePlayer, targetedCoordinate, outcome);
 
@@ -300,7 +321,7 @@ namespace BattleShipCollection
         private Coordinate ResolveBotCoords(BotPlayer bot)
         {
             //Get the oppenent map with shot history
-            Map targetMap = GetTargetMap(GetOppenentPlayer());
+            Map targetMap = activePlayRegistry[bot];
 
             //Update stats for the bot to use
             bot.Moves.UpdateCoordinateRegister(targetMap.HitShots, targetMap.MissedShots);
@@ -331,7 +352,7 @@ namespace BattleShipCollection
             int PLAYERS = ActivePlayRegistry.Count;
 
             //Updates game score
-            UpdateGameStats(activePlayer, 100);
+            UpdateGameStats(activePlayer);
 
             //Checks win condition and how to raise win event
             if (CheckWinCondition(targetMap))
@@ -366,10 +387,21 @@ namespace BattleShipCollection
             }
         }
 
-        private void UpdateGameStats(BasePlayer activeShooter, int score)
+        private void UpdateGameStats(BasePlayer activeShooter)
         {
-            activeShooter.GameData.UpdateScore(score);
+            //Get the active player's score manager
+            var scoreManager = GetPlayerScoreManager(activeShooter);
+
+            //Update and save the round score
+            activeShooter.GameData.UpdateScore(Convert.ToInt32(Math.Floor(scoreManager.FinalScore)));
+
+            //Update Shots made
             activeShooter.GameData.UpdateShotsMade();
+        }
+
+        private ScoreManager GetPlayerScoreManager(BasePlayer player)
+        {
+            return globalSessionScore[player];
         }
 
         public List<string> GetAllAvailableModes()
@@ -428,9 +460,6 @@ namespace BattleShipCollection
                 firedMap.MissedShots.Add(shotCoord);
                 targetedCoordOutcome = ShotOutcome.MISS;
             }
-
-            //Trigger Shot Result Event
-            RaiseShotResultEvent(targetedCoordOutcome, shotCoord.X, shotCoord.Y);
 
             //Return result of the shot
             return targetedCoordOutcome;
@@ -501,12 +530,13 @@ namespace BattleShipCollection
             GameEnd?.Invoke(this, EventArgs.Empty);
         }
 
-        private void RaiseShotResultEvent(ShotOutcome outcome, int x, int y)
+        private void RaiseShotResultEvent(ShotOutcome outcome, int x, int y, BasePlayer shooter)
         {
             ShotAttempt?.Invoke(this, new BattleEventArgs.ShotResultEventArgs(
                 outcome,
                 x,
-                y
+                y,
+                shooter
                 ));
         }
 
