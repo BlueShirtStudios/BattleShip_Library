@@ -86,18 +86,6 @@ namespace BattleShipCollection
 
         }//PlotShips()
 
-        private bool IsActiveRegistryEmpty()
-        {
-            if (activeShips.Count == 0)
-            {
-                return true;
-            }
-            else
-            {
-                return false;
-            }
-        }
-
         public BattleShip DoesShipHaveCoordinate(Coordinate requetedCoord)
         {
             //Go through all the ships in the register

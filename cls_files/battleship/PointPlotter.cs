@@ -6,9 +6,6 @@ namespace BattleShipCollection
     public class PointPlotter
     {
         private CoordinateGenerator coordGene = null;
-
-    //    public List<Coordinate> alreadyComputedCoords = new();
-
         private CoordinateGenerator CoordGene
         {
             get { return this.coordGene; }
@@ -155,89 +152,11 @@ namespace BattleShipCollection
             return checker;
         }
 
-        private int UpdateXLeft(int x, int distance)
-        {
-            return x - (distance);
-        }
-
-        private int UpdateYUp(int y, int distance)
-        {
-            return y + (distance);
-        }
-
-        private int UpdateXRight(int x, int distance)
-        {
-            return x + (distance);
-        } 
-
-        private int UpdateYDown(int y, int distance)
-        {
-            return y - (distance);
-        }
-
         private Directions ChooseDirection(List<Directions> availableDir)
         {
             Random gene = new Random();
             int index = gene.Next(0, availableDir.Count);
             return availableDir[index];
-        }
-
-       
-
-        private List<Coordinate> CreateRightSet(int min, int max, int constant) //Start, End, Coordinate that stays constant
-        {
-            //Initialize
-            List<Coordinate> posNumbers = new();
-
-            //Loop and build set
-            for (int i = min; i <= max; i++)
-            {
-                posNumbers.Add(new Coordinate(i, constant));
-            }
-
-            return posNumbers;
-        }
-
-        private List<Coordinate> CreateUpSet(int min, int max, int constant)  //Start, End, Coordinate that stays constant
-        {
-            //Initialize
-            List<Coordinate> posNumbers = new();
-
-            //Loop and build set
-            for (int i = min; i <= max; i++)
-            {
-                posNumbers.Add(new(constant, 0));
-            }
-
-            return posNumbers;
-        }
-
-        private List<Coordinate> CreateLeftSet(int min, int max, int constant)  //Start, End, Coordinate that stays constant
-        {
-            //Initialize
-            List<Coordinate> posNumbers = new();
-
-            //Loop and build set
-            for (int i = max; i >= min; i--)
-            {
-                posNumbers.Add(new(0, constant));
-            }
-
-            return posNumbers;
-        }
-
-        private List<Coordinate> CreateDownSet(int min, int max, int constant)  //Start, End, Coordinate that stays constant
-        {
-            //Initialize
-            List<Coordinate> posNumbers = new();
-
-            //Loop and build set
-            for (int i = max; i >= min; i--)
-            { 
-                posNumbers.Add(new(constant, 0));
-            }
-
-            return posNumbers;
         }
 
         private List<Coordinate> CreateCoordinateSet(Directions dir, Coordinate startPoint, int shipSize)

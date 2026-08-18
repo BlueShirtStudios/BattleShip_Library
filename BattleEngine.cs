@@ -168,15 +168,6 @@ namespace BattleShipCollection
 
         }
 
-        private bool CanWeInitializeGame()
-        {
-            if (GameMode != GameModes.NOWAY)
-            {
-                return true;
-            }
-            else { return false; }
-        }
-
         public void InitializeGame(EngineConfig cfg)
         {
             try
@@ -233,11 +224,11 @@ namespace BattleShipCollection
 
                 if (map != null)
                 {
+                    var ships = shipList.Select(s => s.Clone()).ToList();
                     map.PlotShips(shipList);
                     ActivePlayRegistry[currentPlayer] = map;
                 }
 
-                
             }
             
         }
@@ -263,17 +254,6 @@ namespace BattleShipCollection
             ErrorOccurred?.Invoke(this, new BattleEventArgs.ErrorEventArgs(
                 msg,
                 e));
-        }
-
-        private void CheckType(object given, object expected)
-        {
-            if (given.GetType() != expected.GetType())
-            {
-                throw new InputException(
-                    expected,
-                    given,
-                    "Invalid Input has been provided");
-            }
         }
 
         private void StartPlayerTurn()

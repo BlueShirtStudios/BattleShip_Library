@@ -98,6 +98,13 @@ namespace BattleShipCollection
             OccupiedCoordinates.Remove(coord);
         }
 
+        public BattleShip Clone()
+        {
+            return new BattleShip(
+                this.Name,
+                this.Width,
+                this.Length);
+        }
     }
 
 }//namespace
