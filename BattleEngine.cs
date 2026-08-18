@@ -61,105 +61,6 @@ namespace BattleShipCollection
             get { return this.globalSessionScore; }
         }
 
-        public void SelectGameMode(string strMode)
-        {
-            try
-            {
-                //Extract from input which is used to determine the mode
-                int mode = Convert.ToInt32(strMode[0].ToString());
-
-                //Assign the game mode
-                switch (mode)
-                {
-                    case 1:
-                        GameMode = GameModes.ONEWAY;
-                        break;
-
-                    case 2:
-                        GameMode = GameModes.TWOWAY;
-                        break;
-
-                    default:
-                        GameMode = GameModes.NOWAY;
-                        break;
-                }
-            }
-            catch
-            {
-                GameMode = GameModes.NOWAY;
-            }
-        }
-
-        public void SelectGameMode(int mode)
-        {
-            try
-            {
-                //Assign the game mode
-                switch (mode)
-                {
-                    case 1:
-                        GameMode = GameModes.ONEWAY;
-                        break;
-
-                    case 2:
-                        GameMode = GameModes.TWOWAY;
-                        break;
-
-                    default:
-                        GameMode = GameModes.NOWAY;
-                        break;
-                }
-            }
-            catch
-            {
-                GameMode = GameModes.NOWAY;
-            }
-        }
-
-        public void SelectBotDifficulty(int diff)
-        {
-            switch (diff)
-            {
-                case 1:
-                    BotMode = BotModes.EASY;
-                    break;
-
-                case 2:
-                    BotMode = BotModes.MEDIUM;
-                    break;
-
-                default:
-                    BotMode = BotModes.NODIFF;
-                    break;
-            }
-        }
-
-        public void SelectBotDifficulty(string diff)
-        {
-            if (GameMode != GameModes.TWOWAY)
-            {
-                //raise error
-            }
-
-            //Get first letter of diff
-            char cDiff = Char.ToLower(diff[0]);
-
-            switch (cDiff)
-            {
-                case 'e':
-                    BotMode = BotModes.EASY;
-                    break;
-
-                case 'm':
-                    BotMode = BotModes.MEDIUM;
-                    break;
-
-                default:
-                    BotMode = BotModes.NODIFF;
-                    break;
-            }
-        }
-
         public void CreateGameMap(int xSize, int ySize)
         {
             try
@@ -190,9 +91,9 @@ namespace BattleShipCollection
                 //Build the score manager dictionary
                 BuildScoreManager(10);
             }
-            catch
+            catch (Exception e)
             {
-
+                RaiseErrorEvent("Undocumented Error has Occurred", e);
             }
             
         }
@@ -201,15 +102,22 @@ namespace BattleShipCollection
         {
             //Build our active registry, handling map creation and coordinate generator
             //Checks which game was activated 
-            if (mode == GameModes.ONEWAY)
+            try
             {
-                ActivePlayRegistry.Add(CreatePlayerObject(ProfileManager.CreateUserProfile()), new Map(x, y));
+                if (mode == GameModes.ONEWAY)
+                {
+                    ActivePlayRegistry.Add(CreatePlayerObject(ProfileManager.CreateUserProfile()), new Map(x, y));
+                }
+                else if (mode == GameModes.TWOWAY)
+                {
+                    //Create Player object and bot object and add to dictionary
+                    ActivePlayRegistry.Add(CreatePlayerObject(ProfileManager.CreateUserProfile()), new Map(x, y));
+                    ActivePlayRegistry.Add(CreateBotPlayerObject(ProfileManager.CreateBotProfile(), BotMode, new CoordinateGenerator(x, y)), new Map(x, y));
+                }
             }
-            else if (mode == GameModes.TWOWAY)
+            catch (Exception e)
             {
-                //Create Player object and bot object and add to dictionary
-                ActivePlayRegistry.Add(CreatePlayerObject(ProfileManager.CreateUserProfile()), new Map(x, y));
-                ActivePlayRegistry.Add(CreateBotPlayerObject(ProfileManager.CreateBotProfile(), BotMode, new CoordinateGenerator(x, y)), new Map(x, y));
+                throw e;
             }
                 
         }
@@ -263,7 +171,7 @@ namespace BattleShipCollection
             }
             catch(Exception e)
             {
-                RaiseErrorEvent("Unkown Error Occured", e);
+                RaiseErrorEvent("Undocumented Error Occured", e);
             }
         }
 
