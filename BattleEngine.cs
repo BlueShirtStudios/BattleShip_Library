@@ -454,5 +454,25 @@ namespace BattleShipCollection
         }
     
 
+        public ShotOutcome[,] DisplayTargetMap()
+        {
+            //Get the active player's target map
+            //First determine the active player state
+            foreach (KeyValuePair<BasePlayer, Map> kvp in ActivePlayRegistry)
+            {
+                //Makes long term readable
+                BasePlayer player = kvp.Key;
+                Map targetMap = kvp.Value;
+
+                //Only allows to display the map for a active player
+                if (player is Player p)
+                {
+                    return targetMap.BuiltMapRepresentation();
+                }
+            }
+
+            return null;
+        }
+
     }//battle engine class
 }

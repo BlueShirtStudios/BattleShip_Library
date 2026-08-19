@@ -13,6 +13,7 @@
         NONE,
         HIT,
         MISS,
-        SUNK
+        SUNK,
+        WATER
     }
 }

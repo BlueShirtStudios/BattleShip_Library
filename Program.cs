@@ -1,4 +1,5 @@
-﻿using BattleShipCollection;
+﻿using BattleEnumCollection;
+using BattleShipCollection;
 using System.Runtime.InteropServices;
 using System.Security.Cryptography.X509Certificates;
 
@@ -64,11 +65,27 @@ class BattleMathConsoleVersion
         battleEngine.AttemptShot(2, 2);
         battleEngine.AttemptShot(2, 3);
 
+        
+
     }
 
     private static void OnGameEnd(object? sender, EventArgs e)
     {
         Console.WriteLine("The game has ended!");
         System.Environment.Exit(0);
+    }
+
+    private static void PrintArray(ShotOutcome[,] map)
+    {
+        for (int r = 0; r < 2; r++)
+        {
+            Console.WriteLine(Convert.ToString(r + 1));
+            for (int c = 0; c < 3; c++)
+            {
+                string state = Convert.ToString(map[r, c]);
+                Console.Write(state + " ");
+            }
+            Console.WriteLine("\n");
+        }
     }
 }

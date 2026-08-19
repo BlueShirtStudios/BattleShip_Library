@@ -1,4 +1,5 @@
-﻿using BattleShipCollection;
+﻿using BattleEnumCollection;
+using BattleShipCollection;
 using System;
 using System.Runtime.InteropServices;
 
@@ -88,6 +89,8 @@ namespace BattleShipCollection
 
         public BattleShip DoesShipHaveCoordinate(Coordinate requetedCoord)
         {
+            bool foundMatch = false;
+
             //Go through all the ships in the register
             foreach (BattleShip ship in activeShips)
             {
@@ -97,12 +100,23 @@ namespace BattleShipCollection
                     //If it does not find a match
                     continue;
                 }
+                else
+                {
+                    foundMatch = true;
+                }
 
-                //If a match is found
-                return ship;
+                //Checks if there was a match found
+                //If it was found
+                if (foundMatch == true)
+                {
+                    AddShotToHistory(requetedCoord, foundMatch);
+                    return ship;
+                }
+                
             }
 
-            //If no matches were found returns null
+            //Else if it gets here, nothing is returned
+            AddShotToHistory(requetedCoord, foundMatch);
             return null;
         }
 
@@ -121,6 +135,73 @@ namespace BattleShipCollection
             return false;
         }
 
+        public ShotOutcome[,] BuiltMapRepresentation()
+        {
+            ShotOutcome[,] mapDisplay = new ShotOutcome[xSize, YSize];
+            ShotOutcome state = ShotOutcome.WATER;
+
+            //Build the map
+            //For each row in the map
+            for (int r = 0; r < xSize; r++)
+            {
+                //For each colom in map
+                for (int c = 0; c < ySize; c++)
+                {
+                    state = DetermineCoordinateState(r + 1, c + 1); //DEV_NOTE: +1 because coordinate 1 -> Max, not 0 -> Max: 0 will give an error
+                    mapDisplay[r, c] = state;
+                }
+            }
+
+            return mapDisplay;
+        }
+
+        private ShotOutcome DetermineCoordinateState(int x, int y)
+        {
+            ShotOutcome state = ShotOutcome.WATER;
+            //Check the hit list
+            if (IsInCoordinateList(HitShots, x, y))
+            {
+                state = ShotOutcome.HIT;
+            }
+
+            //Checks the miss list
+            else if (IsInCoordinateList(MissedShots, x, y))
+            {
+                state = ShotOutcome.MISS;
+            }
+
+            //Return the state it determined
+            return state;
+        }
+
+        private bool IsInCoordinateList(List<Coordinate> list, int x, int y)
+        {
+            //Searches for a coordinate in the provideded list
+            foreach (Coordinate c in list)
+            {
+                if ((c.X == x) && (c.Y == y))
+                {
+                    //If the coordinate is found in given list
+                    return true;
+                }
+            }
+
+            //Else if not, returns false
+            return false;
+        }
+    
+        private void AddShotToHistory(Coordinate passedCoordinate, bool doesShipHaveIt)
+        {
+            //If the passed coordinate was found, add to hit shot registered
+            if (doesShipHaveIt == true)
+            {
+                HitShots.Add(passedCoordinate);
+            }
+            else
+            {
+                missedShots.Add(passedCoordinate);
+            }
+        }
         public enum Directions
         {
             LEFT,
